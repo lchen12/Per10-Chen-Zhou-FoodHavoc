@@ -1,13 +1,7 @@
-public class Chair implements Furniture{
-  
-  private int price;
+public class Chair extends Furniture{
   
   public Chair(){
-    price = 10;
+    super(10);
   }
-  
-  public int getPrice(){
-    return price;
-  }
-  
+        
 }
