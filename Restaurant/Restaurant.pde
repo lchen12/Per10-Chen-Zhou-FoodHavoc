@@ -1,15 +1,15 @@
-Furniture chair;
+ArrayList<Furniture> f;
 
 void setup() {
-  size(480, 120);
-  chair = new Chair();
+  size(1000, 700);
+  background(255);
+  f = new ArrayList<Furniture>();
+  Text t = new Text("FOOD HAVOC");
 }
 
 void draw() {
   if (mousePressed) {
-    fill(0);
-  } else {
-    fill(255);
+    Furniture chair = new Table(4);
+    f.add(chair);
   }
-  ellipse(mouseX, mouseY, 80, 80);
 }
