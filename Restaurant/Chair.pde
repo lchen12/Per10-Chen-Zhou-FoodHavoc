@@ -1,17 +1,17 @@
-class Chair extends Furniture{
+public class Chair extends Furniture{
   
-  boolean occupied;
+  private boolean occupied;
   
-  Chair(){
+  public Chair(){
     super(10,"orangeChair.gif",36,50);
     occupied = false;
   }
   
-  void occupied(){
+  public void occupied(){
     occupied = true;
   }
   
-  void unoccupied(){
+  public void unoccupied(){
     occupied = false;
   }
         

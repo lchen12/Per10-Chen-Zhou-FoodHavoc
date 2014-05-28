@@ -1,15 +1,15 @@
-class Table extends Furniture{
+public class Table extends Furniture{
 
-  int seats;
-  ArrayList<Chair> chairs;
+  private int seats;
+  private ArrayList<Chair> chairs;
   
-  Table(int x){
+  public Table(int x){
     super(20,"woodTable.gif",40,40);
     seats = x;
     chairs = new ArrayList<Chair>();
   }
 
-  void addChair(){
+  public void addChair(){
     if (chairs.size() < seats){
       chairs.add(new Chair());
     }else{

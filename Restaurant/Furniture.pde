@@ -1,24 +1,17 @@
-class Furniture{
+public class Furniture extends Clickable{
   
-  PImage img;
-  int price;
+  private int price;
   
-  Furniture(int price, String jpg, int w, int h){
+  public Furniture(int price, String gif, int w, int h){
+    super(gif,w,h);
     this.price = price;
-    img = loadImage(jpg);
-    img.resize(w,h);
-    image(img,mouseX,mouseY);
   }
   
-  int getPrice(){
+  public int getPrice(){
     return price;
   }
   
-  void size(int w, int h){
-    img.resize(w,h);
-  }
-  
-  void setPrice(int x){
+  public void setPrice(int x){
     price = x;
   }
   
