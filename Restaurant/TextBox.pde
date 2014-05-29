@@ -1,18 +1,23 @@
 public class TextBox{
   
   private PFont f;
+  private String s;
   
   public TextBox(String t){
-    clear(); //makes a rectangle
     f = createFont("Arial",30);
     set(t);
   }
   
-  public void set(String t){
+  public void display(){
     clear();
     textFont(f);
     fill(0);
-    text(t,25,45);
+    text(s,25,45);
+  }    
+  
+  public void set(String t){
+    s = t;
+    display();
   }
   
   public void clear(){

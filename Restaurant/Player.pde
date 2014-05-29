@@ -15,4 +15,35 @@ public class Player{
   public void move(){
   }
   
+  public int getLevel(){
+    return level;
+  }  
+  public int getMoney(){
+    return money;
+  }  
+  public int getGoal(){
+    return goal;
+  }
+  public int getProfit(){
+    return profit;
+  }
+  public float getX(){
+    return x;
+  }
+  public float getY(){
+    return y;
+  }
+  public float getSpeed(){
+    return speed;
+  }
+  public void level(){
+    level++;
+  }
+  public void addMoney(int m) throws Exception{
+    if (money+m < 0){
+      throw new Exception("Cannot purchase item because too little mula.");
+    }
+    money+=m;
+  }
+  
 }
