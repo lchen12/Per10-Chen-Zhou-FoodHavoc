@@ -1,6 +1,7 @@
 import java.util.*;
 
 //use queue for steps
+
 MyLinkedList<Clickable> f;
 TextBox t;
 String state, input;
@@ -28,16 +29,26 @@ void draw() {
     t.set("Welcome to FOOD HAVOC! Do you have an account? Type (y) or (n)");
     ///////////////HOW TO WAIT FOR USER??//////////////
     if (key == 'y' || key == 'Y'){
-      clearInput();
-      t.set("Please type your Username");
+      //clearInput();
+      confirmUsername();
     }else if (key == 'n' || key == 'N'){
-      t.set("To make an account, please type a Username");
+      makeUsername();
     }
   }
 }
 
+void confirmUsername(){
+  t.set("Please type your Username: "+input);
+}
+
+void makeUsername(){
+  t.set("To make an account, please type a Username and press Enter.");
+  t.add(input);
+}
+
 void keyReleased(){
   input += key;
+  System.out.println((int)key + " " +key + ", "+ input);
 }
 
 void clearInput(){
@@ -54,4 +65,6 @@ void mousePressed(){
   }
   Furniture chair = new Chair();
   f.add(chair);
+  Customer person = new YoungLady();
+  f.add(person);
 }

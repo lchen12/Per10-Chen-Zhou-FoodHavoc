@@ -20,6 +20,11 @@ public class TextBox{
     display();
   }
   
+  public void add(String t){
+    s += t;
+    display();
+  }
+  
   public void clear(){
     fill(204,102,0);
     rect(0,0,displayWidth,50,7);
