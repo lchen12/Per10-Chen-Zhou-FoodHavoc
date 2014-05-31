@@ -7,6 +7,11 @@ public class Furniture extends Clickable{
     this.price = price;
   }
   
+  public Furniture(int price, String gif, int w, int h, int x, int y){
+    super(gif,w,h,x,y);
+    this.price = price;
+  }
+  
   public int getPrice(){
     return price;
   }

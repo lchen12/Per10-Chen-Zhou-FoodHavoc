@@ -3,9 +3,15 @@ public class Table extends Furniture{
   private int seats;
   private ArrayList<Chair> chairs;
   
-  public Table(int x){
-    super(20,"woodTable.gif",40,40);
-    seats = x;
+  public Table(int s){
+    super(20,"woodTable.gif",100,100);
+    seats = s;
+    chairs = new ArrayList<Chair>();
+  }
+
+  public Table(int s, int x, int y){
+    super(20,"woodTable.gif",100,100,x,y);
+    seats = s;
     chairs = new ArrayList<Chair>();
   }
 

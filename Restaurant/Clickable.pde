@@ -1,36 +1,71 @@
-public class Clickable{
-  
-  private int x, y, width, height;
+public class Clickable {
+
+  private int x, y, w, h;
   private PImage img;
-  //private boolean isOver;
-  
-  public Clickable(String gif, int w, int h){
+  private boolean clicked;
+
+  public Clickable(String gif, int w, int h) {
     img = loadImage(gif);
-    img.resize(w,h);
-    width = w;
-    height = h;
-    x = mouseX - width/2;
-    y = mouseY - height/2;
+    img.resize(w, h);
+    this.w = w;
+    this.h = h;
+    x = mouseX - w/2;
+    y = mouseY - h/2;
     display();
   }
-  
-  public void display(){
-    image(img,x,y);
+
+  public Clickable(String gif, int w, int h, int x, int y) {
+    img = loadImage(gif);
+    img.resize(w, h);
+    this.w = w;
+    this.h = h;
+    this.x = x;
+    this.y = y;
+    display();
   }
-  
-  public boolean over(){
-    if (mouseX >= x && mouseX <= x+width &&
-        mouseY >= y && mouseY <= y+height){
-          //isOver = true;
-          return true;
-        }else{
-          //isOver = false;
-          return false;
-        }
+
+  public void display() {
+    image(img, x, y);
   }
-  
-  public void size(int w, int h){
-    img.resize(w,h);
+
+  public boolean over() {
+    if (mouseX >= x && mouseX <= x+w &&
+      mouseY >= y && mouseY <= y+h) {
+      //isOver = true;
+      return true;
+    } else {
+      //isOver = false;
+      return false;
+    }
   }
-  
+
+  public boolean isClicked() {
+    return clicked;
+  }
+
+  public void click() {
+    clicked = true;
+  }
+
+  public void unclick() {
+    clicked = false;
+  }
+
+  public void size(int w, int h) {
+    img.resize(w, h);
+  }
+
+  public int getX() {
+    return x;
+  }
+
+  public int getY() {
+    return y;
+  }
+
+  public void setLocation(int x, int y) {
+    this.x = x;
+    this.y = y;
+  }
 }
+
