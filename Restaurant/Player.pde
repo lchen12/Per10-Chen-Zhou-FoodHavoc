@@ -4,7 +4,7 @@ public class Player{
   
   public Player(){
     level = 1;
-    money = 10;
+    money = 100;
     goal = 100;
     profit = 0;
     x = 0;
@@ -39,11 +39,12 @@ public class Player{
   public void level(){
     level++;
   }
-  public void addMoney(int m) throws Exception{
+  public boolean addMoney(int m){
     if (money+m < 0){
-      throw new Exception("Cannot purchase item because too little mula.");
+      return false;
     }
     money+=m;
+    return true;
   }
   
 }

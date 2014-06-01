@@ -8,7 +8,7 @@ MyLinkedList<Clickable> f;
 TextBox txt, restart;
 Player p;
 String state, input, entry, username;
-boolean entered;
+boolean entered, mouseClicked;
 PImage image;
 
 void setup() {
@@ -20,13 +20,14 @@ void setup() {
   //String[] fontList = PFont.list();
   //println(fontList);
   //state = "welcome";
-  state = "purchase";
+  state = "mainScreen";
   input = "";
   users = new Hashtable<String, String>();
   entered = false;
   username = "";
   readUsersFile();
   image = loadImage("diner.png");
+  p = new Player();
 }
 
 void draw() {
@@ -48,6 +49,8 @@ void draw() {
       input = "";
       state = "makeUsername";
     }
+  } else if (state.equals("mainScreen")){
+    mainScreen();
   } else if (state.equals("error")) {
     txt.set("Error. Please restart and try again.");
   } else if (state.equals("confirmUsername")) {
@@ -62,7 +65,7 @@ void draw() {
     txt.set("Play!");
   } else if (state.equals("purchase")) {
     purchase();
-  } else if (state.equals("setPurchase")){
+  } else if (state.equals("setPurchase")) {
     setPurchase();
   }
 }
@@ -84,19 +87,28 @@ void addToUsersFile(String p) { /////THIS ADDS THE NEW USERNAME+PASSWORD INTO US
   }
   after[after.length-1] = username+","+p;
   saveStrings("users.csv", after);
-  /*
-  PrintWriter output = createWriter("users.csv"); 
-   output.append(before+"\n"+username+","+p);
-   output.flush();
-   output.close();
-   */
 }
 
-/*
-void addUser(String u, String p) {
- users.put(u, p);
- }
- */
+void mainScreen(){
+  int x = 200;
+  int y = 200;
+  TextBox play = new TextBox("PLAY", 0, 255, 0, x, y, 150, 50);
+  TextBox purchase = new TextBox("SHOP", 0, 255, 0, x, y+100, 150, 50);
+  TextBox logout = new TextBox("LOGOUT", 0, 255, 0, x, y+200, 150, 50);
+  if (mouseClicked){
+    if (mouseX > x && mouseX < x+150){
+      if (mouseY > y && mouseY < y+50){
+        state = "play";
+      }else if (mouseY > y+100 && mouseY < y+150){
+        state = "purchase";
+      }else if (mouseY > y+200 && mouseY < y+250){
+        state = "welcome";
+      }
+    }
+    mouseClicked = false;
+  }
+}
+
 void confirmUsername() {
   txt.set("Please type your Username and then press Enter: "+input);
   if (entered) {
@@ -126,7 +138,7 @@ void confirmPassword() {
 
 void checkPassword(String p) {
   if (users.get(username).equals(p)) {
-    state = "play";
+    state = "mainScreen";
   } else {
     state = "error";
   }
@@ -151,46 +163,67 @@ void makePassword() {
   if (entered) {
     users.put(username, entry);
     entered = false;
-    state = "play";
+    state = "mainScreen";
     addToUsersFile(entry);
   }
 }
 
 void purchase() {
   txt.set("Click on an item you would like to purchase.");
-  int sizeBefore = f.size();
-  Clickable c = new Chair(200,200);
-  f.add(c);
-  c = new Coffee(300,200);
-  f.add(c); 
-  c = new Table(4,400,200);
-  f.add(c); 
-  c = new DishWasher(500,200);
-  f.add(c); 
-  int sizeAfter = f.size();
-  print(f);
-  for (int i = sizeBefore; i < sizeAfter; i++){
-    Furniture a = (Furniture)(f.get(i));
-    print(i);
-    print(a.getPrice());
-    text("$"+a.getPrice(), a.getX(), a.getY()-10);
-  }
-  for (int i = 0; i < f.size (); i++) {
-    if (f.get(i).isClicked()){
-      Clickable chosen = f.get(i);
-      chosen.unclick();
-      f.remove(i);
-      f.add(chosen);
-      state = "setPurchase";
+  //int sizeBefore = f.size();
+  int cols = 5;
+  int rows = 1;
+  int x = 200;
+  int y = 200;
+  //////MAKES A CHART TO DISPLAY THE ITEMS TO PURCHASE//////////
+  for (int i = 0; i < cols; i++) {
+    for (int j = 0; j < rows; j++) {
+      fill(255);
+      stroke(0);
+      rect(x, y, 100, 100); 
+      x+=100;
     }
   }
+  x = 200;
+  Furniture c = new Chair(x, y);
+  displayPrice(c);
+  Furniture d = new Coffee(x+100, y);
+  displayPrice(d); 
+  Furniture e = new Table(4, x+200, y);
+  displayPrice(e);
+  Furniture g = new DishWasher(x+300, y);
+  displayPrice(g);
+  if (mouseClicked){
+    if (mouseX > x && mouseY < y+100 && mouseY > y){
+      if (mouseX < x+100){
+        f.add(new Chair());
+      }else if (mouseX < x+200){
+        f.add(new Coffee());
+      }else if (mouseX < x+300){
+        f.add(new Table(4));
+      }else if (mouseX < x+400){
+        f.add(new DishWasher());
+      }
+      state = "setPurchase";
+    }
+    mouseClicked = false;
+  }
+  
 }
 
-void setPurchase(){
+void displayPrice(Furniture a){
+  text("$"+a.getPrice(),a.getX(),a.getY()-10);
+}
+
+void setPurchase() {
   txt.set("Click where you wish to place your new item.");
-  f.get(f.size()-1).setLocation(mouseX,mouseY);
-  if (mousePressed){
+  Furniture current = (Furniture)f.get(f.size()-1);
+  current.setLocation(mouseX, mouseY);
+  int price = current.getPrice();
+  if (mouseClicked) {
+    p.addMoney(-price);
     state = "purchase";
+    mouseClicked = false;
   }
 } 
 
@@ -225,14 +258,14 @@ void deleteInventory() {
   }
 }
 
-void mousePressed() {
+void mouseReleased() {
+  mouseClicked = true;
   ///////////IF PERSON CLICKS RESTART BUTTON.......
   if (mouseX >= displayWidth-150 && mouseX <= displayWidth &&
     mouseY >= 50 && mouseY <= 100) {
     state = "welcome";
     return;
   }
-
   for (int i = 0; i < f.size (); i++) {
     if (f.get(i).over()) {
       f.get(i).click();
