@@ -19,5 +19,8 @@ public class Chair extends Furniture{
   public void unoccupied(){
     occupied = false;
   }
+  public String toString(){
+    return "chair";
+  }
         
 }

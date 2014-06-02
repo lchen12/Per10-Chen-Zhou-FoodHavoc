@@ -7,5 +7,8 @@ public class Coffee extends Furniture{
   public Coffee(int x, int y){
     super(20,"coffee.gif",36,50,x,y);
   }
+  public String toString(){
+    return "coffee";
+  }
   
 }
