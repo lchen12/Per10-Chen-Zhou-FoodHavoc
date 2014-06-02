@@ -13,6 +13,7 @@ public class Clickable {
     y = mouseY - h/2;
     display();
   }
+  
 
   public Clickable(String gif, int w, int h, int x, int y) {
     img = loadImage(gif);

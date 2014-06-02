@@ -9,7 +9,7 @@ TextBox txt, restart;
 Player p;
 String state, input, entry, username;
 boolean entered;
-PImage image;
+PImage image,play,buy;
 
 void setup() {
   //size(displayWidth, displayHeight);
@@ -19,7 +19,7 @@ void setup() {
   restart = new TextBox("Restart", 255, 0, 0, displayWidth-150, 50, 150, 50);
   //String[] fontList = PFont.list();
   //println(fontList);
-  //state = "welcome";
+ // state = "welcome";
   state = "purchase";
   input = "";
   users = new Hashtable<String, String>();
@@ -27,6 +27,7 @@ void setup() {
   username = "";
   readUsersFile();
   image = loadImage("diner.png");
+
 }
 
 void draw() {
@@ -38,6 +39,10 @@ void draw() {
     Clickable c = itr.next();
     c.display();
   }
+  Clickable  c = new Button("play.gif",600,350);
+  f.add(c);
+  c= new Button("buy.gif",600,500);
+  f.add(c);
   if (state.equals("welcome")) {
     txt.set("Welcome to FOOD HAVOC! Do you have an account? Type (y) or (n)");
     ///////////////HOW TO WAIT FOR USER??//////////////
@@ -161,7 +166,8 @@ void purchase() {
   int sizeBefore = f.size();
   Clickable c = new Chair(200,200);
   f.add(c);
-  c = new Coffee(300,200);
+  c=new Coffee(300,200);
+  
   f.add(c); 
   c = new Table(4,400,200);
   f.add(c); 

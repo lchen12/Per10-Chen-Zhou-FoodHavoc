@@ -14,6 +14,7 @@ public class TextBox{
     this.y = y;
     this.w = w;
     this.h = h;
+    display();
   }
   ////DEFAULT CONSTRUCTOR
   public TextBox(String t, int x, int y){
