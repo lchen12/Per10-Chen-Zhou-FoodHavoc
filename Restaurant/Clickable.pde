@@ -63,6 +63,11 @@ public class Clickable {
   public int getY() {
     return y;
   }
+  
+  public void setImage(String gif){
+    img = loadImage(gif);
+    img.resize(w,h);
+  }
 
   public void setLocation(int x, int y) {
     this.x = x;

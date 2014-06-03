@@ -1,11 +1,12 @@
 import java.util.*;
 import java.io.*;
 
+//////////somehow use stacks?
 Hashtable<String, String> users;
 ArrayList<Furniture> items; ///furniture that the player has already bought
 ArrayList<Clickable> f; ///furniture+customers to be displayed in game
 LinkedList<Clickable> moves; ///furniture+customers player has clicked on and wants to move to (First In First Out data structure) 
-TextBox txt, restart;
+TextBox txt, mainScreen, stats;
 Player p;
 String state, input, entry, username;
 boolean entered, mouseClicked;
@@ -17,26 +18,31 @@ void setup() {
   size(displayWidth, displayHeight);
   f = new ArrayList<Clickable>();
   moves = new LinkedList<Clickable>();
-  items = new ArrayList<Furniture>();
+  items = new ArrayList<Furniture>();  
+  username = null;
+  id = 0;
   txt = new TextBox("", 20, 216, 222, 0, 0, displayWidth, 50); //cyan color
-  restart = new TextBox("Restart", 255, 0, 0, displayWidth-150, 50, 150, 50);
+  //////////I CHANGED THE RESTART BUTTON INTO A MAIN SCREEN BUTTON
+  mainScreen = new TextBox("Main Screen", 0, 255, 0, displayWidth-200, 50, 200, 50);
+  stats = new TextBox("", 255, 255, 255, displayWidth-200, 100, 200, 300);
+  stats.setSize(20);
   //String[] fontList = PFont.list();
   //println(fontList);
   state = "welcome";
   input = "";
   users = new Hashtable<String, String>();
   entered = false;
-  username = "";
   readUsersFile();
   image = loadImage("diner.png");
+  image.resize(displayWidth, displayHeight);
   current = null;
 }
 
 void draw() {
-  image.resize(displayWidth, displayHeight);
   background(image);
   txt.display();
-  restart.display();
+  mainScreen.display();
+  stats.display();
   Iterator<Furniture> itr = items.iterator();
   while (itr.hasNext ()) {
     Clickable c = itr.next();
@@ -72,13 +78,17 @@ void draw() {
   } else if (state.equals("choosePlayer")) {
     choosePlayer();
   } else if (state.equals("play")) {
-    if (p==null) {
+    if (username == null) {
+      state = "welcome";
+    } else if (p==null) {
       state = "choosePlayer";
     } else {
       play();
     }
   } else if (state.equals("purchase")) {
     purchase();
+  } else if (state.equals("purchaseChair")) {
+    purchaseChair();
   } else if (state.equals("deleteInventory")) {
     deleteInventory();
   } else if (state.equals("setPurchase")) {
@@ -113,11 +123,19 @@ void mainScreen() {
   TextBox logout = new TextBox("LOGOUT", 0, 255, 0, x, y+200, 150, 50);
   if (mouseClicked) {
     if (mouseX > x && mouseX < x+150) {
+        ///////////if player clicked PLAY button..........
       if (mouseY > y && mouseY < y+50) {
         state = "play";
+        ///////////if player clicked SHOP button..........
       } else if (mouseY > y+100 && mouseY < y+150) {
         state = "purchase";
+        ///////////if player clicked LOG OUT button..........
       } else if (mouseY > y+200 && mouseY < y+250) {
+        f = new ArrayList<Clickable>();
+        moves = new LinkedList<Clickable>();
+        items = new ArrayList<Furniture>();  
+        username = null;
+        id = 0;
         state = "welcome";
       }
     }
@@ -160,6 +178,7 @@ void checkPassword(String p) {
     initiatePlayer();
     setFurniture();
   } else {
+    username = null;
     state = "error";
   }
   entered = false;
@@ -184,6 +203,8 @@ void initiatePlayer() {
   }
   String[] variables = lines[id].split(",");
   p = new Player(variables[0], Integer.parseInt(variables[1]), Integer.parseInt(variables[2]), Integer.parseInt(variables[3]), Integer.parseInt(variables[4]));
+  ////updates Stats textbox
+  stats.set("Name: "+username+"\nLevel: "+p.getLevel()+"\nMoney: "+p.getMoney()+"\nSpeed: "+p.getSpeed());
 }
 
 
@@ -211,7 +232,7 @@ void makePassword() {
     addToUsersFile(entry);
     addLineToPlayersFile();
     setid();
-    addFurniture();
+    startFurniture();
     setFurniture();
   }
 }
@@ -231,28 +252,24 @@ void choosePlayer() {
   txt.set("Would you like your server to be male(m) or female(f)? Type m or f.");
   if (key == 'm' || key == 'M') {
     p = new Player("male");
-    state = "play";
-    addPlayer();
   } else if (key == 'f' || key == 'F') {
     p = new Player("female");
-    state = "play";
-    addPlayer();
   }
+  state = "play";
+  savePlayer();
 }
 
-///WRITES NEW PLAYER INTO PLAYERS.CSV///////////////////
-void addPlayer() {
+///SAVES PLAYER INTO PLAYERS.CSV///////////////////
+void savePlayer() {
   String[] players = loadStrings("players.csv");
-  players[players.length-1] = p.getGender()+","+p.getLevel()+","+p.getMoney()+","+p.getGoal()+","+p.getSpeed();
+  players[id] = p.getGender()+","+p.getLevel()+","+p.getMoney()+","+p.getGoal()+","+p.getSpeed();
   saveStrings("players.csv", players);
 }
 
 /////////////ADDS BASIC FURNITURE AND SAVES THEM INTO FILE FOR FUTURE REFERENCE
-void addFurniture() {
+void startFurniture() {
   PrintWriter output = createWriter("users/"+username+".csv");
-  output.println("chair,500,500");
-  output.println("chair,500,600");
-  output.println("table,400,500");
+  output.println("table,400,500,4,2");
   output.println("diswasher,700,300");
   output.flush();
   output.close();
@@ -262,14 +279,14 @@ void setFurniture() {
   String[] stuff = loadStrings("users/"+username+".csv");
   for (String s : stuff) {
     String variables[] = s.split(",");
-    if (variables[0].equals("chair")) {
-      items.add(new Chair(Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
-    } else if (variables[0].equals("coffee")) {
+    /*if (variables[0].equals("chair")) {
+     items.add(new Chair(Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
+     } else*/    if (variables[0].equals("coffee")) {
       items.add(new Coffee(Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
     } else if (variables[0].equals("dishwasher")) {
       items.add(new DishWasher(Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
     } else if (variables[0].equals("table")) {
-      items.add(new Table(4, Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
+      items.add(new Table(Integer.parseInt(variables[1]), Integer.parseInt(variables[2]), Integer.parseInt(variables[3]), Integer.parseInt(variables[4])));
     }
   }
 }
@@ -279,7 +296,13 @@ void saveFurniture() {
   String[] after = new String[items.size()];
   for (int i = 0; i < after.length; i++) {
     Furniture a = items.get(i);
-    after[i] = a.toString()+","+a.getX()+","+a.getY();
+    if (a.toString().equals("table")) {
+      Table b = (Table) a;
+      after[i] = b.toString()+","+b.getX()+","+b.getY()+","+b.getMaxSeats()+","+b.getSeats();
+      println(after[i]);/////////////////////////////////////////////////////
+    } else {
+      after[i] = a.toString()+","+a.getX()+","+a.getY();
+    }
   }
   saveStrings("users/"+username+".csv", after);
 }
@@ -302,30 +325,59 @@ void purchase() {
     }
   }
   x = 200;
-  Furniture c = new Chair(x, y);
+  Furniture c = new Chair(x, y, "faceLeft");
   displayPrice(c);
   Furniture d = new Coffee(x+100, y);
   displayPrice(d);
-  Furniture e = new Table(4, x+200, y);
+  Furniture e = new Table(x+200, y, 4, 0);
   displayPrice(e);
   Furniture g = new DishWasher(x+300, y);
   displayPrice(g);
   if (mouseClicked) {
     if (mouseX > x && mouseY < y+100 && mouseY > y) {
       if (mouseX < x+100) {
-        items.add(new Chair());
-      } else if (mouseX < x+200) {
-        items.add(new Coffee());
-      } else if (mouseX < x+300) {
-        items.add(new Table(4));
-      } else if (mouseX < x+400) {
-        items.add(new DishWasher());
+        state = "purchaseChair";
+      } else {
+        if (mouseX < x+200) {
+          items.add(new Coffee());
+        } else if (mouseX < x+300) {
+          items.add(new Table(4));
+        } else if (mouseX < x+400) {
+          items.add(new DishWasher());
+        }
+        state = "setPurchase";
       }
-      state = "setPurchase";
     }
     mouseClicked = false;
   }
 }
+
+void purchaseChair() {
+  txt.set("Select the table you would like to add the chair to.");
+  TextBox cancel = new TextBox("Cancel", 255, 0, 0, displayWidth-400, 50, 150, 50);
+  if (mouseClicked) {
+    ///if player clicked on cancel button........
+    if (mouseX >= displayWidth-400 && mouseY <= 100) {
+      state = "purchase";
+    } else {
+      if (current!=null && current.toString().equals("table")) {
+        Table a = (Table) current;
+        if (a.addChair()) {
+          if (p.addMoney(-(a.getPrice()))) {
+            saveFurniture();
+            savePlayer();
+            state = "purchase";
+          } else {
+            a.removeChair();
+          }
+        }
+        current = null;
+      }
+    }
+    mouseClicked = false;
+  }
+}
+
 
 void displayPrice(Furniture a) {
   text("$"+a.getPrice(), a.getX(), a.getY()-10);
@@ -333,16 +385,29 @@ void displayPrice(Furniture a) {
 
 void setPurchase() {
   txt.set("Click where you wish to place your new item.");
-  Furniture current = items.get(items.size()-1);
+  TextBox cancel = new TextBox("Cancel", 255, 0, 0, displayWidth-400, 50, 150, 50);
+  Furniture current = items.get(items.size()-1/*items.peek()*/);
   current.setLocation(mouseX, mouseY);
   int price = current.getPrice();
   if (mouseClicked) {
-    p.addMoney(-price);
+    //println(mouseX+","+mouseY);
+    //println(displayWidth-300+","+100);
+    ///if the person clicked on the cancel button....
+    if (mouseX >= displayWidth-400 && mouseY <= 100) {
+      items.remove(items.size()-1);
+    } else {
+      if (p.addMoney(-price)) {
+        saveFurniture();
+        savePlayer();
+      }
+    }
     state = "purchase";
-    saveFurniture();
+    ////////////TO DO: NOTIFY PLAYER THAT HE DOESN'T HAVE ENOUGH $$ TO PURCHASE ITEM
     mouseClicked = false;
   }
 }
+
+
 
 void keyPressed() {
   //print(input.indexOf('?'));
@@ -369,9 +434,11 @@ void clearInput() {
 
 //////////NOTE TO SELF: ACTIVATE THIS FUNCTION AND MAKE AN EDIT RESTUARANT FUNCTION///////////
 void deleteInventory() {
-  for (int i = 0; i < f.size (); i++) {
-    if (f.get(i).isClicked()) {
-      f.remove(i);
+  for (int i = 0; i < items.size (); i++) {
+    if (items.get(i).isClicked()) {
+      items.remove(i);
+      saveFurniture();
+      savePlayer();
     }
   }
 }
@@ -397,10 +464,12 @@ void play() {
 
 void mouseReleased() {
   mouseClicked = true;
-  ///////////IF PERSON CLICKS RESTART BUTTON.......
-  if (mouseX >= displayWidth-150 && mouseX <= displayWidth &&
+  ///////////IF PERSON CLICKS THE MAIN SCREEN BUTTON.......
+  if (mouseX >= displayWidth-200 && mouseX <= displayWidth &&
     mouseY >= 50 && mouseY <= 100) {
-    state = "welcome";
+    //username = null;
+    //id = 0;
+    state = "mainScreen";
     return;
   }
   for (int i = 0; i < items.size (); i++) {

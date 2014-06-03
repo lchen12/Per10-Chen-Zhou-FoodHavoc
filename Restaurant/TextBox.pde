@@ -30,6 +30,10 @@ public class TextBox{
     display();
   }
   
+  public void setSize(int s){
+    f = createFont("Arial",s);
+  }
+  
   public void display(){
     clear();
     textFont(f);
