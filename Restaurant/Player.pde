@@ -11,8 +11,8 @@ public class Player {
       person = loadImage("waiter.gif");
     }
     this.gender = gender;
-    w = 200;
-    h = 300;
+    w = 100;
+    h = 150;
     person.resize(w, h);
     level = 1;
     money = 100;
@@ -51,12 +51,12 @@ public class Player {
     } else {      
       if (Math.abs(x-(c.getX()+w))>5 && x < c.getX()-w ) {
         x+=speed;
-      }else if (Math.abs(x-(c.getX()+w))>5 && x > c.getX()-w){
+      } else if (Math.abs(x-(c.getX()+w))>5 && x > c.getX()-w) {
         x-=speed;
       }
-      if (Math.abs(y-(c.getY()+h)) > 5 && y < c.getY()-h){
+      if (Math.abs(y-(c.getY()+h)) > 5 && y < c.getY()-h) {
         y+=speed;
-      }else if (Math.abs(y-(c.getY()+h)) > 5 && y > c.getY()-h){
+      } else if (Math.abs(y-(c.getY()+h)) > 5 && y > c.getY()-h) {
         y-=speed;
       }
       return false;

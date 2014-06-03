@@ -13,13 +13,20 @@ public class Clickable {
     y = mouseY - h/2;
     display();
   }
-  
 
   public Clickable(String gif, int w, int h, int x, int y) {
     img = loadImage(gif);
     img.resize(w, h);
     this.w = w;
     this.h = h;
+    this.x = x;
+    this.y = y;
+    display();
+  }
+
+  /////////CONSTRUCTOR ONLY FOR PARTY CLASS
+  public Clickable(int x, int y) {
+    img = null;
     this.x = x;
     this.y = y;
     display();
@@ -63,10 +70,10 @@ public class Clickable {
   public int getY() {
     return y;
   }
-  
-  public void setImage(String gif){
+
+  public void setImage(String gif) {
     img = loadImage(gif);
-    img.resize(w,h);
+    img.resize(w, h);
   }
 
   public void setLocation(int x, int y) {

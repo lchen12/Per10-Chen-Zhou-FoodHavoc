@@ -4,18 +4,23 @@ import java.io.*;
 //////////somehow use stacks?
 Hashtable<String, String> users;
 ArrayList<Furniture> items; ///furniture that the player has already bought
-ArrayList<Clickable> f; ///furniture+customers to be displayed in game
+ArrayList<Party> customers; ///customers to be displayed in game
+ArrayList<Clickable> f; ///clickable stuff to add to game that doesn't belong to any other arraylist?
 LinkedList<Clickable> moves; ///furniture+customers player has clicked on and wants to move to (First In First Out data structure) 
 TextBox txt, mainScreen, stats;
 Player p;
+Party currentParty;
 String state, input, entry, username;
 boolean entered, mouseClicked;
 Clickable current; //item that player just clicked on
-int id;
+int id, lastTimeCheck, timeInterval; //keeps track of how long after the last customers appeared
 PImage image, play, buy;
+Random rand;
 
 void setup() {
   size(displayWidth, displayHeight);
+  rand = new Random(1); /////////create random seed so customers come the same order
+  customers = new ArrayList<Party>();
   f = new ArrayList<Clickable>();
   moves = new LinkedList<Clickable>();
   items = new ArrayList<Furniture>();  
@@ -36,6 +41,8 @@ void setup() {
   image = loadImage("diner.png");
   image.resize(displayWidth, displayHeight);
   current = null;
+  lastTimeCheck = millis();
+  timeInterval = 3000;
 }
 
 void draw() {
@@ -43,9 +50,14 @@ void draw() {
   txt.display();
   mainScreen.display();
   stats.display();
-  Iterator<Furniture> itr = items.iterator();
-  while (itr.hasNext ()) {
-    Clickable c = itr.next();
+  Iterator<Furniture> itrF = items.iterator();
+  while (itrF.hasNext ()) {
+    Clickable c = itrF.next();
+    c.display();
+  }
+  Iterator<Party> itrC = customers.iterator();
+  while (itrC.hasNext ()) {
+    Clickable c = itrC.next();
     c.display();
   }
   Clickable  c = new Button("play.gif", 600, 350);
@@ -85,6 +97,8 @@ void draw() {
     } else {
       play();
     }
+  } else if (state.equals("seatCustomers")) {
+    seatCustomers();
   } else if (state.equals("purchase")) {
     purchase();
   } else if (state.equals("purchaseChair")) {
@@ -123,7 +137,7 @@ void mainScreen() {
   TextBox logout = new TextBox("LOGOUT", 0, 255, 0, x, y+200, 150, 50);
   if (mouseClicked) {
     if (mouseX > x && mouseX < x+150) {
-        ///////////if player clicked PLAY button..........
+      ///////////if player clicked PLAY button..........
       if (mouseY > y && mouseY < y+50) {
         state = "play";
         ///////////if player clicked SHOP button..........
@@ -134,6 +148,7 @@ void mainScreen() {
         f = new ArrayList<Clickable>();
         moves = new LinkedList<Clickable>();
         items = new ArrayList<Furniture>();  
+        stats = new TextBox("", 255, 255, 255, displayWidth-200, 100, 200, 300);
         username = null;
         id = 0;
         state = "welcome";
@@ -204,9 +219,13 @@ void initiatePlayer() {
   String[] variables = lines[id].split(",");
   p = new Player(variables[0], Integer.parseInt(variables[1]), Integer.parseInt(variables[2]), Integer.parseInt(variables[3]), Integer.parseInt(variables[4]));
   ////updates Stats textbox
-  stats.set("Name: "+username+"\nLevel: "+p.getLevel()+"\nMoney: "+p.getMoney()+"\nSpeed: "+p.getSpeed());
+  updateStats();
 }
 
+////updates Stats textbox
+void updateStats() {
+  stats.set("Name: "+username+"\nLevel: "+p.getLevel()+"\nMoney: "+p.getMoney()+"\nSpeed: "+p.getSpeed());
+}
 
 void makeUsername() {
   txt.set("To make an account, please type a new Username and then press Enter: "+input);
@@ -350,6 +369,7 @@ void purchase() {
     }
     mouseClicked = false;
   }
+  updateStats();
 }
 
 void purchaseChair() {
@@ -376,11 +396,14 @@ void purchaseChair() {
     }
     mouseClicked = false;
   }
+  updateStats();
 }
 
 
 void displayPrice(Furniture a) {
+  textSize(20);
   text("$"+a.getPrice(), a.getX(), a.getY()-10);
+  text(a.toString(), a.getX(), a.getY()-30);
 }
 
 void setPurchase() {
@@ -405,6 +428,7 @@ void setPurchase() {
     ////////////TO DO: NOTIFY PLAYER THAT HE DOESN'T HAVE ENOUGH $$ TO PURCHASE ITEM
     mouseClicked = false;
   }
+  updateStats();
 }
 
 
@@ -441,15 +465,27 @@ void deleteInventory() {
       savePlayer();
     }
   }
+  updateStats();
 }
 
 void play() {
   txt.set("When a customer arrives, click on the customer, click on a table, and start serving!");
-  p.display();
+  p.display();  
+  if ( millis() > lastTimeCheck + timeInterval ) {
+    lastTimeCheck = millis();
+    customers.add(new Party(rand, 4,1000,500));
+    println(lastTimeCheck/1000);
+  }
   if (mouseClicked) {
     if (current!=null) {
-      moves.add(current);
-      print(moves);
+      ////////////////IF PLAYER CLICKED A CUSTOMER
+      if (customers.contains(current)) {
+        currentParty = (Party)current;
+        state = "seatCustomers";
+      } else {
+        moves.add(current);
+        print(moves);
+      }
       current = null;
     }
     mouseClicked = false;
@@ -459,6 +495,22 @@ void play() {
     if (p.move(moves.peek())) {
       moves.remove();
     }
+  }
+  updateStats();
+}
+
+void seatCustomers() {
+  txt.set("Click a table to seat the customer(s).");
+  if (mouseClicked) {
+    if (current!=null && current.toString().equals("table")) {
+      Table t = (Table) current;
+      if (currentParty.getSize() <= t.getSeats()) {
+        ////////////////////TO DO: SEAT CUSTOMERS ONTO TABLE
+        currentParty.setLocation(t.getX(), t.getY());
+      }
+      current = null;
+    }
+    mouseClicked = false;
   }
 }
 
@@ -476,6 +528,12 @@ void mouseReleased() {
     if (items.get(i).over()) {
       items.get(i).click();
       current = items.get(i);
+    }
+  }
+  for (int i = 0; i < customers.size (); i++) {
+    if (customers.get(i).over()) {
+      customers.get(i).click();
+      current = customers.get(i);
     }
   }
 }
