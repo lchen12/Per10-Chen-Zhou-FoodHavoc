@@ -280,9 +280,11 @@ void choosePlayer() {
 
 ///SAVES PLAYER INTO PLAYERS.CSV///////////////////
 void savePlayer() {
-  String[] players = loadStrings("players.csv");
-  players[id] = p.getGender()+","+p.getLevel()+","+p.getMoney()+","+p.getGoal()+","+p.getSpeed();
-  saveStrings("players.csv", players);
+  if (p!=null){
+    String[] players = loadStrings("players.csv");
+    players[id] = p.getGender()+","+p.getLevel()+","+p.getMoney()+","+p.getGoal()+","+p.getSpeed();
+    saveStrings("players.csv", players);
+  }
 }
 
 /////////////ADDS BASIC FURNITURE AND SAVES THEM INTO FILE FOR FUTURE REFERENCE
