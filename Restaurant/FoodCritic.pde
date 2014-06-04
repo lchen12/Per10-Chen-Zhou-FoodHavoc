@@ -12,5 +12,8 @@ public class FoodCritic extends Customer {
       fee=200;
     }
   }
+  public String toString() {
+    return "FoodCritic";
+  }
 }
 

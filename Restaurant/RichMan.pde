@@ -12,5 +12,8 @@ public class RichMan extends Customer {
       tip=100;
     }
   }
+  public String toString() {
+    return "RichMan";
+  }
 }
 

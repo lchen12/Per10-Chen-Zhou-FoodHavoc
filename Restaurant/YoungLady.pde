@@ -4,6 +4,9 @@ public class YoungLady extends Customer {
     super("younglady.gif", 100, 111);
     setSpeed(5);
   }
+  public String toString() {
+    return "YoungLady";
+  }
 }
 
 

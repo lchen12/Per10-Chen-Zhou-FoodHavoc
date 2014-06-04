@@ -2,9 +2,8 @@ public class CollegeKid extends Customer {
   int kids;
   //ArrayList<Kids> Kids;
 
-  public CollegeKid(int x) {
-    super("collegekid.gif", 40, 40);
-    kids = x;
+  public CollegeKid() {
+    super("collegekid.gif", 80, 80);
     //kids = new ArrayList<Kids>();
   }
   /*
@@ -19,5 +18,8 @@ public class CollegeKid extends Customer {
    speed=4;
    }
    */
+  public String toString() {
+    return "CollegeKid";
+  }
 }
 

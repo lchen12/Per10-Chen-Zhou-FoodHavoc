@@ -9,5 +9,8 @@ public class OldLady extends Customer {
   public void decrease() {
     setPatience(getPatience()-4);
   }
+  public String toString() {
+    return "OldLady";
+  }
 }
 

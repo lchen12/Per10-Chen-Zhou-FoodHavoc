@@ -60,7 +60,11 @@ public class Clickable {
   }
 
   public void size(int w, int h) {
-    img.resize(w, h);
+    this.w = w;
+    this.h = h;
+    if (img!=null){
+      img.resize(w, h);
+    }
   }
 
   public int getX() {
@@ -69,6 +73,13 @@ public class Clickable {
 
   public int getY() {
     return y;
+  }
+  public int getW() {
+    return w;
+  }
+
+  public int getH() {
+    return h;
   }
 
   public void setImage(String gif) {

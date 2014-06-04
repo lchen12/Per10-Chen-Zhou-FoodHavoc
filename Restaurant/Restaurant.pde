@@ -10,6 +10,7 @@ LinkedList<Clickable> moves; ///furniture+customers player has clicked on and wa
 TextBox txt, mainScreen, stats;
 Player p;
 Party currentParty;
+ArrayList<String> options; ////list of customer types to choose from
 String state, input, entry, username;
 boolean entered, mouseClicked;
 Clickable current; //item that player just clicked on
@@ -41,6 +42,11 @@ void setup() {
   image = loadImage("diner.png");
   image.resize(displayWidth, displayHeight);
   current = null;
+  options = new ArrayList<String>();
+  options.add("RichMan");
+  options.add("YoungLady");
+  options.add("FoodCritic");    
+  options.add("CollegeKid");
   lastTimeCheck = millis();
   timeInterval = 3000;
 }
@@ -60,10 +66,10 @@ void draw() {
     Clickable c = itrC.next();
     c.display();
   }
-  Clickable  c = new Button("play.gif", 600, 350);
-  f.add(c);
-  c= new Button("buy.gif", 600, 500);
-  f.add(c);
+  //Clickable  c = new Button("play.gif", 600, 350);
+  //f.add(c);
+  //c= new Button("buy.gif", 600, 500);
+  //f.add(c);
   if (state.equals("welcome")) {
     txt.set("Welcome to FOOD HAVOC! Do you have an account? Type (y) or (n)");
     ///////////////HOW TO WAIT FOR USER??//////////////
@@ -107,6 +113,8 @@ void draw() {
     deleteInventory();
   } else if (state.equals("setPurchase")) {
     setPurchase();
+  } else if (state.equals("confirmMainScreen")) {
+    confirmMainScreen();
   }
 }
 
@@ -148,6 +156,7 @@ void mainScreen() {
         f = new ArrayList<Clickable>();
         moves = new LinkedList<Clickable>();
         items = new ArrayList<Furniture>();  
+        customers = new ArrayList<Party>();
         stats = new TextBox("", 255, 255, 255, displayWidth-200, 100, 200, 300);
         username = null;
         id = 0;
@@ -155,6 +164,17 @@ void mainScreen() {
       }
     }
     mouseClicked = false;
+  }
+}
+
+////////ONLY HAPPENS WHEN PLAYER IS IN PLAYING MODE AND WANTS TO QUIT MID-SHIFT
+void confirmMainScreen() {
+  txt.set("Are you sure you would like to quit playing? The profits made during your shift will not be saved. Type (y) or (n)");
+  if (key == 'y' || key == 'Y') {
+    customers = new ArrayList<Party>();
+    state = "mainScreen";
+  } else if (key == 'n' || key == 'N') {
+    state = "play";
   }
 }
 
@@ -280,7 +300,7 @@ void choosePlayer() {
 
 ///SAVES PLAYER INTO PLAYERS.CSV///////////////////
 void savePlayer() {
-  if (p!=null){
+  if (p!=null) {
     String[] players = loadStrings("players.csv");
     players[id] = p.getGender()+","+p.getLevel()+","+p.getMoney()+","+p.getGoal()+","+p.getSpeed();
     saveStrings("players.csv", players);
@@ -391,6 +411,8 @@ void purchaseChair() {
             state = "purchase";
           } else {
             a.removeChair();
+            a.removeChair();
+            a.addChair();
           }
         }
         current = null;
@@ -475,7 +497,15 @@ void play() {
   p.display();  
   if ( millis() > lastTimeCheck + timeInterval ) {
     lastTimeCheck = millis();
-    customers.add(new Party(rand, 4,1000,500));
+    //////////////////////////////////////////////////////////
+    int picker = rand.nextInt(options.size());
+    String type = options.get(picker);
+    if (type.equals("Old")) {
+      customers.add(new OldParty(rand, 4, displayWidth-300, 500));
+    } else {
+      customers.add(new Party(rand, 4, displayWidth-300, 500, type));
+    }
+    //println(customers.get(0).getSize());
     println(lastTimeCheck/1000);
   }
   if (mouseClicked) {
@@ -505,10 +535,18 @@ void seatCustomers() {
   txt.set("Click a table to seat the customer(s).");
   if (mouseClicked) {
     if (current!=null && current.toString().equals("table")) {
+      println(current);
+      println(currentParty);
       Table t = (Table) current;
-      if (currentParty.getSize() <= t.getSeats()) {
+      ////////if table has enough seats..........
+      println(currentParty.getSize()+","+ t.getSeats()+"seats");
+      if (currentParty.getSize() <= t.getSeats() && !t.isOccupied()) {
         ////////////////////TO DO: SEAT CUSTOMERS ONTO TABLE
-        currentParty.setLocation(t.getX(), t.getY());
+        /////set table as occupied
+        t.occupy();
+        println(currentParty.getSize());
+        currentParty.setLocation(t);
+        state = "play";
       }
       current = null;
     }
@@ -523,7 +561,11 @@ void mouseReleased() {
     mouseY >= 50 && mouseY <= 100) {
     //username = null;
     //id = 0;
-    state = "mainScreen";
+    if (state.equals("play") || state.equals("seatCustomers")) {
+      state = "confirmMainScreen";
+    } else {
+      state = "mainScreen";
+    }
     return;
   }
   for (int i = 0; i < items.size (); i++) {

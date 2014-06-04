@@ -1,5 +1,6 @@
 public class Table extends Furniture {
 
+  private boolean occupied;
   private int seats;
   private int maxSeats;
   private ArrayList<Chair> chairs;
@@ -10,17 +11,19 @@ public class Table extends Furniture {
     maxSeats = ms;
     seats = 0;
     chairs = new ArrayList<Chair>();
+    occupied = false;
   }
 
   //////CONSTRUCTOR FOR ALREADY-PURCHASED TABLE
   public Table(int x, int y, int ms, int s) {
     super(20, "woodTable.gif", 100, 100, x, y);
     maxSeats = ms;
-    seats = s;
+    seats = 0;
     chairs = new ArrayList<Chair>();
     for (int i = 0; i < s; i++) {
       addChair();
     }
+    occupied = false;
   }
 
   public void display() {
@@ -40,7 +43,17 @@ public class Table extends Furniture {
     return maxSeats;
   }
 
+  public void occupy() {
+    occupied = true;
+  }
 
+  public void unoccupy() {
+    occupied = false;
+  }
+  
+  public boolean isOccupied(){
+    return occupied;
+  }
 
   public boolean addChair() {
     if (chairs.size() < maxSeats/2) {
@@ -60,6 +73,7 @@ public class Table extends Furniture {
   public void removeChair() {
     if (chairs.size()>0) {
       chairs.remove(0);
+      seats--;
     }
   }
 
