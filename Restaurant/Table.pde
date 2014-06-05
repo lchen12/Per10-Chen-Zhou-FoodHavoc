@@ -1,8 +1,7 @@
 public class Table extends Furniture {
 
   private boolean occupied;
-  private int seats;
-  private int maxSeats;
+  private int seats, maxSeats, orderNumber;
   private ArrayList<Chair> chairs;
 
   ///CONSTRUCTOR FOR NEW TABLE
@@ -12,6 +11,7 @@ public class Table extends Furniture {
     seats = 0;
     chairs = new ArrayList<Chair>();
     occupied = false;
+    orderNumber = 0;
   }
 
   //////CONSTRUCTOR FOR ALREADY-PURCHASED TABLE
@@ -24,6 +24,7 @@ public class Table extends Furniture {
       addChair();
     }
     occupied = false;
+    orderNumber = 0;
   }
 
   public void display() {
@@ -37,6 +38,14 @@ public class Table extends Furniture {
 
   public int getSeats() {
     return seats;
+  }
+
+  public int getOrderNumber() {
+    return orderNumber;
+  }
+
+  public void setOrderNumber(int o) {
+    orderNumber = o;
   }
 
   public int getMaxSeats() {

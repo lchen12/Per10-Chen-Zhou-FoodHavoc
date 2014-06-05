@@ -14,7 +14,7 @@ ArrayList<String> options; ////list of customer types to choose from
 String state, input, entry, username;
 boolean entered, mouseClicked;
 Clickable current; //item that player just clicked on
-int id, lastTimeCheck, timeInterval; //keeps track of how long after the last customers appeared
+int id, customersWaiting, customersToAdd, lastTimeCheck, timeInterval; //keeps track of how long after the last customers appeared
 PImage image, play, buy;
 Random rand;
 
@@ -498,14 +498,26 @@ void play() {
   if ( millis() > lastTimeCheck + timeInterval ) {
     lastTimeCheck = millis();
     //////////////////////////////////////////////////////////
-    int picker = rand.nextInt(options.size());
-    String type = options.get(picker);
-    if (type.equals("Old")) {
-      customers.add(new OldParty(rand, 4, displayWidth-300, 500));
-    } else {
-      customers.add(new Party(rand, 4, displayWidth-300, 500, type));
+    if (customersWaiting < 5){
+        int picker = rand.nextInt(options.size());
+        String type = options.get(picker);
+        if (type.equals("Old")) {
+          customers.add(new OldParty(rand, 4, displayWidth-300, 100+customersWaiting*150));
+        } else {
+          customers.add(new Party(rand, 4, displayWidth-300, 100+customersWaiting*150, type));
+        }
+        customersWaiting++;
     }
-    //println(customers.get(0).getSize());
+    for (int i = 0; i < customers.size (); i++) {
+      Party p = customers.get(i);
+      p.decrease();
+      if (p.getPatience()<0){
+        if (p.getState().equals("waiting")){
+          customersWaiting--;
+        }
+        customers.remove(i);
+      }
+    }
     println(lastTimeCheck/1000);
   }
   if (mouseClicked) {
@@ -523,8 +535,13 @@ void play() {
     mouseClicked = false;
   }
   if (moves.size()>0) {
+    ///the next move
+    Clickable c = moves.peek();
     ////true if player finished moving to Clickable
-    if (p.move(moves.peek())) {
+    if (p.move(c)) {
+      if (c.toString().equals("Table")){
+        
+      }
       moves.remove();
     }
   }
@@ -538,14 +555,14 @@ void seatCustomers() {
       println(current);
       println(currentParty);
       Table t = (Table) current;
-      ////////if table has enough seats..........
-      println(currentParty.getSize()+","+ t.getSeats()+"seats");
+      ////////if table has enough seats and table isn't occupied..........
       if (currentParty.getSize() <= t.getSeats() && !t.isOccupied()) {
-        ////////////////////TO DO: SEAT CUSTOMERS ONTO TABLE
         /////set table as occupied
         t.occupy();
-        println(currentParty.getSize());
         currentParty.setLocation(t);
+        currentParty.setState("ordering");
+        customersWaiting--;
+        currentParty.setPatience(100);
         state = "play";
       }
       current = null;
