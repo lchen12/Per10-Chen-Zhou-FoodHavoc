@@ -1,24 +1,25 @@
-public class CollegeKid extends Customer{
+public class CollegeKid extends Customer {
   int kids;
   //ArrayList<Kids> Kids;
-  
-  public CollegeKid(int x){
-    super("collegekid.gif",40,40);
-    kids = x;
+
+  public CollegeKid() {
+    super("collegekid.gif", 80, 80);
     //kids = new ArrayList<Kids>();
   }
-/*
+  /*
   public void addkid(){
-    if (kids.size() < kids){
-      kids.add(new Kids());
-    }else{
-      text("Kids has reached maximum capacity. Cannot add anymore kids.", 0,0);
-    }
-  }
-  public void setSpeed(){
+   if (kids.size() < kids){
+   kids.add(new Kids());
+   }else{
+   text("Kids has reached maximum capacity. Cannot add anymore kids.", 0,0);
+   }
+   }
+   public void setSpeed(){
    speed=4;
+   }
+   */
+  public String toString() {
+    return "CollegeKid";
   }
-  */
-    
-      
 }
+
