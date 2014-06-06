@@ -1,7 +1,8 @@
 public class Table extends Furniture {
 
+  //private PFont f;
   private boolean occupied;
-  private int seats, maxSeats, orderNumber;
+  private int seats, maxSeats, orderNumber, widthWithChairs;
   private ArrayList<Chair> chairs;
 
   ///CONSTRUCTOR FOR NEW TABLE
@@ -12,11 +13,13 @@ public class Table extends Furniture {
     chairs = new ArrayList<Chair>();
     occupied = false;
     orderNumber = 0;
+    //f = createFont("Arial", 10);
   }
 
   //////CONSTRUCTOR FOR ALREADY-PURCHASED TABLE
   public Table(int x, int y, int ms, int s) {
     super(20, "woodTable.gif", 100, 100, x, y);
+    widthWithChairs = 100;
     maxSeats = ms;
     seats = 0;
     chairs = new ArrayList<Chair>();
@@ -25,6 +28,7 @@ public class Table extends Furniture {
     }
     occupied = false;
     orderNumber = 0;
+    //f = createFont("Arial", 10);
   }
 
   public void display() {
@@ -33,6 +37,15 @@ public class Table extends Furniture {
       for (Chair c : chairs) {
         c.display();
       }
+    }
+    ////////make a small white square with ordernumber on it
+    if (orderNumber!=0){      
+      fill(255,255,255);
+      rect(getX()+getW()/4, getY(), 25,25);
+      //textFont(f);
+      fill(50);
+      //textSize(100);
+      text(orderNumber,getX()+getW()/4+8, getY()+getY()/20);
     }
   }
 
@@ -63,13 +76,24 @@ public class Table extends Furniture {
   public boolean isOccupied(){
     return occupied;
   }
+  
+  public int getW(){
+    return widthWithChairs;
+  }
 
   public boolean addChair() {
     if (chairs.size() < maxSeats/2) {
+      if (chairs.size() == 0){
+        setLocation(getX()-50,getY());
+        widthWithChairs+=50;
+      }
       chairs.add(new Chair(getX()-50, getY()+50*(chairs.size()%(maxSeats/2)), "faceRight"));
       seats++;
       return true;
     } else if (chairs.size() < maxSeats) {
+      if (chairs.size() == maxSeats/2){
+        widthWithChairs+=50;
+      }
       chairs.add(new Chair(getX()+75, getY()+50*(chairs.size()%(maxSeats/2)), "faceLeft"));
       seats++;
       return true;

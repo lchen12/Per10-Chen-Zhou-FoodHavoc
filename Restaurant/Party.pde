@@ -2,7 +2,8 @@ public class Party extends Clickable {
 
   private ArrayList<Customer> customers;
   private int size, patience;
-  private String type, state;
+  private String type, state; //STATES: "WAITING" "ORDERING" "WAITINGFORFOOD" "EATING"
+  private Table table;
 
   public Party(Random rand, int max, int x, int y, String type) {
     super(x, y);
@@ -40,6 +41,7 @@ public class Party extends Clickable {
     this.type = type;
     patience = customers.get(0).getPatience();
     state = "waiting";
+    table = null;
   }
 
   public void display() {
@@ -91,5 +93,16 @@ public class Party extends Clickable {
     }
     return result;
   }
+  
+  public Table getTable(){
+    return table;
+  }
+  
+  public void addTable(Table t){
+    table = t;
+    /////////set width and height of party to that of table
+    size(t.getW(),t.getH());
+  }
+  
 }
 

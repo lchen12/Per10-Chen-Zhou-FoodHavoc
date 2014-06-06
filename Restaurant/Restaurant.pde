@@ -1,3 +1,5 @@
+//////////OPTIONAL: ADD A PODIUM TO MAKE CUSTOMERS WAITING IN LINE HAPPIER
+
 import java.util.*;
 import java.io.*;
 
@@ -7,14 +9,14 @@ ArrayList<Furniture> items; ///furniture that the player has already bought
 ArrayList<Party> customers; ///customers to be displayed in game
 ArrayList<Clickable> f; ///clickable stuff to add to game that doesn't belong to any other arraylist?
 LinkedList<Clickable> moves; ///furniture+customers player has clicked on and wants to move to (First In First Out data structure) 
-TextBox txt, mainScreen, stats;
+TextBox txt, mainScreen, stats, cancel;
 Player p;
 Party currentParty;
 ArrayList<String> options; ////list of customer types to choose from
 String state, input, entry, username;
 boolean entered, mouseClicked;
 Clickable current; //item that player just clicked on
-int id, customersWaiting, customersToAdd, lastTimeCheck, timeInterval; //keeps track of how long after the last customers appeared
+int id, customersToServe, customersWaiting, customersWaitingForFood, lastTimeCheck, timeInterval; //keeps track of how long after the last customers appeared
 PImage image, play, buy;
 Random rand;
 
@@ -31,6 +33,7 @@ void setup() {
   //////////I CHANGED THE RESTART BUTTON INTO A MAIN SCREEN BUTTON
   mainScreen = new TextBox("Main Screen", 0, 255, 0, displayWidth-200, 50, 200, 50);
   stats = new TextBox("", 255, 255, 255, displayWidth-200, 100, 200, 300);
+  cancel = new TextBox("Cancel", 255, 0, 0, displayWidth-350, 50, 150, 50);
   stats.setSize(20);
   //String[] fontList = PFont.list();
   //println(fontList);
@@ -56,14 +59,19 @@ void draw() {
   txt.display();
   mainScreen.display();
   stats.display();
-  Iterator<Furniture> itrF = items.iterator();
-  while (itrF.hasNext ()) {
-    Clickable c = itrF.next();
+  Iterator<Furniture> itrI = items.iterator();
+  while (itrI.hasNext ()) {
+    Clickable c = itrI.next();
     c.display();
   }
   Iterator<Party> itrC = customers.iterator();
   while (itrC.hasNext ()) {
     Clickable c = itrC.next();
+    c.display();
+  }
+  Iterator<Clickable> itrF = f.iterator();
+  while (itrF.hasNext ()) {
+    Clickable c = itrF.next();
     c.display();
   }
   //Clickable  c = new Button("play.gif", 600, 350);
@@ -105,6 +113,8 @@ void draw() {
     }
   } else if (state.equals("seatCustomers")) {
     seatCustomers();
+  } else if (state.equals("endLevel")) {
+    endLevel();
   } else if (state.equals("purchase")) {
     purchase();
   } else if (state.equals("purchaseChair")) {
@@ -172,6 +182,8 @@ void confirmMainScreen() {
   txt.set("Are you sure you would like to quit playing? The profits made during your shift will not be saved. Type (y) or (n)");
   if (key == 'y' || key == 'Y') {
     customers = new ArrayList<Party>();
+    f = new ArrayList<Clickable>();
+    p.setLocation(0,100);
     state = "mainScreen";
   } else if (key == 'n' || key == 'N') {
     state = "play";
@@ -240,11 +252,12 @@ void initiatePlayer() {
   p = new Player(variables[0], Integer.parseInt(variables[1]), Integer.parseInt(variables[2]), Integer.parseInt(variables[3]), Integer.parseInt(variables[4]));
   ////updates Stats textbox
   updateStats();
+  customersToServe = 3+2*p.getLevel();
 }
 
 ////updates Stats textbox
 void updateStats() {
-  stats.set("Name: "+username+"\nLevel: "+p.getLevel()+"\nMoney: "+p.getMoney()+"\nSpeed: "+p.getSpeed());
+  stats.set("Name: "+username+"\nLevel: "+p.getLevel()+"\nMoney: "+p.getMoney()+"\nSpeed: "+p.getSpeed()+"\nProfit: "+p.getProfit()+"\nGoal: "+p.getGoal());
 }
 
 void makeUsername() {
@@ -294,6 +307,7 @@ void choosePlayer() {
   } else if (key == 'f' || key == 'F') {
     p = new Player("female");
   }
+  customersToServe = 5; //total number of parties to be served in each round; based on level
   state = "play";
   savePlayer();
 }
@@ -396,10 +410,10 @@ void purchase() {
 
 void purchaseChair() {
   txt.set("Select the table you would like to add the chair to.");
-  TextBox cancel = new TextBox("Cancel", 255, 0, 0, displayWidth-400, 50, 150, 50);
+  cancel.display();
   if (mouseClicked) {
     ///if player clicked on cancel button........
-    if (mouseX >= displayWidth-400 && mouseY <= 100) {
+    if (mouseX >= displayWidth-350 && mouseY <= 100) {
       state = "purchase";
     } else {
       if (current!=null && current.toString().equals("table")) {
@@ -432,7 +446,7 @@ void displayPrice(Furniture a) {
 
 void setPurchase() {
   txt.set("Click where you wish to place your new item.");
-  TextBox cancel = new TextBox("Cancel", 255, 0, 0, displayWidth-400, 50, 150, 50);
+  cancel.display();
   Furniture current = items.get(items.size()-1/*items.peek()*/);
   current.setLocation(mouseX, mouseY);
   int price = current.getPrice();
@@ -440,7 +454,7 @@ void setPurchase() {
     //println(mouseX+","+mouseY);
     //println(displayWidth-300+","+100);
     ///if the person clicked on the cancel button....
-    if (mouseX >= displayWidth-400 && mouseY <= 100) {
+    if (mouseX >= displayWidth-350 && mouseY <= 100) {
       items.remove(items.size()-1);
     } else {
       if (p.addMoney(-price)) {
@@ -498,23 +512,27 @@ void play() {
   if ( millis() > lastTimeCheck + timeInterval ) {
     lastTimeCheck = millis();
     //////////////////////////////////////////////////////////
-    if (customersWaiting < 5){
+    if (customersToServe > 0) { ////if maximum number of customers isn't reached yet...
+      if (customersWaiting < 5) {
         int picker = rand.nextInt(options.size());
         String type = options.get(picker);
         if (type.equals("Old")) {
-          customers.add(new OldParty(rand, 4, displayWidth-300, 100+customersWaiting*150));
+          customers.add(new OldParty(rand, 4, displayWidth/8, 100+customersWaiting*150));
         } else {
-          customers.add(new Party(rand, 4, displayWidth-300, 100+customersWaiting*150, type));
+          customers.add(new Party(rand, 4, displayWidth/8, 120+customersWaiting*150, type));
         }
         customersWaiting++;
+        customersToServe--;
+      }
     }
     for (int i = 0; i < customers.size (); i++) {
-      Party p = customers.get(i);
-      p.decrease();
-      if (p.getPatience()<0){
-        if (p.getState().equals("waiting")){
+      Party party = customers.get(i);
+      party.decrease(); //decrease patience of each party every few seconds
+      if (party.getPatience()<0) {
+        if (party.getState().equals("waiting")) {
           customersWaiting--;
         }
+        p.addProfit(party.getSize()*(-250));
         customers.remove(i);
       }
     }
@@ -522,8 +540,8 @@ void play() {
   }
   if (mouseClicked) {
     if (current!=null) {
-      ////////////////IF PLAYER CLICKED A CUSTOMER
-      if (customers.contains(current)) {
+      ////////////////IF PLAYER CLICKED A CUSTOMER, AND THAT CUSTOMER IS ON LINE
+      if (customers.contains(current) && ((Party)current).getState().equals("waiting")) {
         currentParty = (Party)current;
         state = "seatCustomers";
       } else {
@@ -539,8 +557,47 @@ void play() {
     Clickable c = moves.peek();
     ////true if player finished moving to Clickable
     if (p.move(c)) {
+      println(c);
+      if (customers.contains(c)) {
+        currentParty = (Party)c;
+        if (currentParty.getState().equals("ordering")) {
+          currentParty.setState("waitingForFood");
+          customersWaitingForFood++;
+          currentParty.getTable().setOrderNumber(customersWaitingForFood);
+          currentParty.setPatience(100);
+          f.add(new ServingDome(displayWidth*6/7,displayHeight/7+100*customersWaitingForFood,currentParty.getTable().getOrderNumber())); //creates a serving dome on the counter
+          print(f);
+          p.addProfit(20);
+        } else if (currentParty.getState().equals("waitingForFood")) {
+          customersWaitingForFood--;
+          currentParty.getTable().setOrderNumber(0);
+          currentParty.setState("eating");          
+          currentParty.setPatience(100);
+          p.addProfit(30);
+        } else if (currentParty.getState().equals("eating")) {
+          currentParty.getTable().unoccupy();
+          customers.remove(currentParty);
+          p.addProfit(40);
+          p.addMoney(currentParty.getPatience()/20);
+
+          //////IF THAT WAS THE LAST CUSTOMER.........
+          if (customers.size()==0 && customersToServe==0) {
+            p.level();
+            savePlayer(); //save player's stats
+            state = "endLevel";
+          }
+        }
+      } else if (f.contains(c)) { ////f is the array of Clickables that doesn't belong to items or customers; it has ServingDomes, food plates, etc...
+        if (f.toString().equals("ServingDome")) {
+          if (p.holdItem(c)) {
+            //////////////???????????????????????????????????????????????
+          }
+        }
+        /*
       if (c.toString().equals("Table")){
-        
+         
+         }
+         */
       }
       moves.remove();
     }
@@ -550,13 +607,20 @@ void play() {
 
 void seatCustomers() {
   txt.set("Click a table to seat the customer(s).");
+  cancel.display();
   if (mouseClicked) {
-    if (current!=null && current.toString().equals("table")) {
+    ///if player clicked on cancel button........
+    if (mouseX >= displayWidth-350 && mouseY <= 100) {
+      state = "play";
+    } else if (current!=null && current.toString().equals("table")) {
       println(current);
       println(currentParty);
       Table t = (Table) current;
       ////////if table has enough seats and table isn't occupied..........
       if (currentParty.getSize() <= t.getSeats() && !t.isOccupied()) {
+        /////set party's table
+        currentParty.addTable(t);
+        //println(currentParty.getW()+","+currentParty.getH()+": table "+t.getW()+","+t.getH());
         /////set table as occupied
         t.occupy();
         currentParty.setLocation(t);
@@ -568,6 +632,14 @@ void seatCustomers() {
       current = null;
     }
     mouseClicked = false;
+  }
+}
+
+void endLevel() {
+  if (p.getProfit()<p.getGoal()) {
+    txt.set("Darn! You didn't earn enough to reach your goal, but don't lose hope! Practice makes perfect.");
+  } else {    
+    txt.set("Congratulations! You are now level "+p.getLevel()+"! Keep up the good work!");
   }
 }
 
@@ -595,6 +667,12 @@ void mouseReleased() {
     if (customers.get(i).over()) {
       customers.get(i).click();
       current = customers.get(i);
+    }
+  }
+  for (int i = 0; i < f.size (); i++) {
+    if (f.get(i).over()) {
+      f.get(i).click();
+      current = f.get(i);
     }
   }
 }
