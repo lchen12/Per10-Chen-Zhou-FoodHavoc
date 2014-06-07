@@ -14,7 +14,7 @@ Player p;
 Party currentParty;
 ArrayList<String> options; ////list of customer types to choose from
 String state, input, entry, username;
-boolean entered, mouseClicked;
+boolean entered, mouseClicked, chefCooking;
 Clickable current; //item that player just clicked on
 int id, customersToServe, customersWaiting, customersWaitingForFood, lastTimeCheck, timeInterval; //keeps track of how long after the last customers appeared
 PImage image, play, buy;
@@ -183,7 +183,7 @@ void confirmMainScreen() {
   if (key == 'y' || key == 'Y') {
     customers = new ArrayList<Party>();
     f = new ArrayList<Clickable>();
-    p.setLocation(0,100);
+    p.setLocation(0, 100);
     state = "mainScreen";
   } else if (key == 'n' || key == 'N') {
     state = "play";
@@ -325,7 +325,7 @@ void savePlayer() {
 void startFurniture() {
   PrintWriter output = createWriter("users/"+username+".csv");
   output.println("table,400,500,4,2");
-  output.println("diswasher,700,300");
+  output.println("trashBin,700,300");
   output.flush();
   output.close();
 }
@@ -338,8 +338,8 @@ void setFurniture() {
      items.add(new Chair(Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
      } else*/    if (variables[0].equals("coffee")) {
       items.add(new Coffee(Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
-    } else if (variables[0].equals("dishwasher")) {
-      items.add(new DishWasher(Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
+    } else if (variables[0].equals("trashBin")) {
+      items.add(new TrashBin(Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
     } else if (variables[0].equals("table")) {
       items.add(new Table(Integer.parseInt(variables[1]), Integer.parseInt(variables[2]), Integer.parseInt(variables[3]), Integer.parseInt(variables[4])));
     }
@@ -386,7 +386,7 @@ void purchase() {
   displayPrice(d);
   Furniture e = new Table(x+200, y, 4, 0);
   displayPrice(e);
-  Furniture g = new DishWasher(x+300, y);
+  Furniture g = new TrashBin(x+300, y);
   displayPrice(g);
   if (mouseClicked) {
     if (mouseX > x && mouseY < y+100 && mouseY > y) {
@@ -398,7 +398,7 @@ void purchase() {
         } else if (mouseX < x+300) {
           items.add(new Table(4));
         } else if (mouseX < x+400) {
-          items.add(new DishWasher());
+          items.add(new TrashBin());
         }
         state = "setPurchase";
       }
@@ -536,6 +536,16 @@ void play() {
         customers.remove(i);
       }
     }
+    for (int i = 0; i < f.size (); i++) {
+      if (f.get(i).toString().equals("Chef")) {
+        Chef c = (Chef)(f.get(i));
+        c.decreaseTime();
+        if (c.getTime()==0) {
+          f.add(new ServingDome(c.getX()-50, c.getY(), c.getOrderNumber())); //creates a serving dome on the counter
+          f.remove(c);
+        }
+      }
+    }
     println(lastTimeCheck/1000);
   }
   if (mouseClicked) {
@@ -565,15 +575,18 @@ void play() {
           customersWaitingForFood++;
           currentParty.getTable().setOrderNumber(customersWaitingForFood);
           currentParty.setPatience(100);
-          f.add(new ServingDome(displayWidth*6/7,displayHeight/7+100*customersWaitingForFood,currentParty.getTable().getOrderNumber())); //creates a serving dome on the counter
-          print(f);
+          f.add(new Chef(displayWidth*5/6+customersWaitingForFood*50, displayHeight/7+100*customersWaitingForFood, currentParty.getTable().getOrderNumber())); //creates a chef near the dome
           p.addProfit(20);
         } else if (currentParty.getState().equals("waitingForFood")) {
-          customersWaitingForFood--;
-          currentParty.getTable().setOrderNumber(0);
-          currentParty.setState("eating");          
-          currentParty.setPatience(100);
-          p.addProfit(30);
+          if (p.checkOrderNumber(currentParty.getTable().getOrderNumber())) { ////if player is holding a dome with the same order number as party
+            f.remove(p.getDome(currentParty.getTable().getOrderNumber()));
+            p.removeDome(currentParty.getTable().getOrderNumber());
+            customersWaitingForFood--;
+            currentParty.getTable().setOrderNumber(0);
+            currentParty.setState("eating");          
+            currentParty.setPatience(100);
+            p.addProfit(30);
+          }
         } else if (currentParty.getState().equals("eating")) {
           currentParty.getTable().unoccupy();
           customers.remove(currentParty);
@@ -588,16 +601,9 @@ void play() {
           }
         }
       } else if (f.contains(c)) { ////f is the array of Clickables that doesn't belong to items or customers; it has ServingDomes, food plates, etc...
-        if (f.toString().equals("ServingDome")) {
-          if (p.holdItem(c)) {
-            //////////////???????????????????????????????????????????????
-          }
+        if (c.toString().equals("ServingDome")) {
+          p.holdItem(c);
         }
-        /*
-      if (c.toString().equals("Table")){
-         
-         }
-         */
       }
       moves.remove();
     }

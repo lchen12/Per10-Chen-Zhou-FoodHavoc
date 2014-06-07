@@ -3,7 +3,7 @@ public class ServingDome extends Furniture {
   private int orderNumber;
   
   public ServingDome(int x, int y, int o) {
-    super(20, "servingDome.gif", 50, 25, x, y);
+    super(0, "servingDome.gif", 50, 25, x, y);
     orderNumber = o;
   }
   
@@ -12,6 +12,10 @@ public class ServingDome extends Furniture {
     text(orderNumber,getX()+getW()/2, getY()+getH());
   }
   
+  public int getOrderNumber() {
+    return orderNumber;
+  }
+
   public String toString() {
     return "ServingDome";
   }

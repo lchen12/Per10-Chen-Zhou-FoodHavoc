@@ -1,11 +1,11 @@
-public class Dish extends Furniture {
+public class Food extends Furniture {
 
-  public Dish(int x, int y, int o) {
-    super(20, "plate.gif", 58, 17, x, y);
+  public Food(int x, int y, int o) {
+    super(0, "plate.gif", 58, 17, x, y);
   }
   
   public String toString() {
-    return "Dish";
+    return "Food";
   }
   
 }

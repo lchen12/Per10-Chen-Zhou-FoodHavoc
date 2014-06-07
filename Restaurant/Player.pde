@@ -1,4 +1,3 @@
-////////FIX THE MOVE FUNCTION, WHY DOES THE WAITER FREEZE??
 ////////////REMEMBER TO ADD COFFEE FEATURE
 ///////////////ALSO ADD CHAIN FEATURE
 
@@ -7,7 +6,7 @@ public class Player {
   private String gender;
   private ArrayList<ServingDome> domes;
   private ArrayList<Menu> menus;
-  private ArrayList<Dish> dishes;
+  private ArrayList<Food> food;
   private PImage person;
 
   ///DEFAULT CONSTRUCTOR
@@ -25,12 +24,12 @@ public class Player {
     money = 100;
     goal = 500;
     profit = 0;
-    x = 0;
-    y = 100;
+    x = displayWidth/6;
+    y = displayHeight/6;
     speed = 3;
     domes = new ArrayList<ServingDome>();
     menus = new ArrayList<Menu>();
-    dishes = new ArrayList<Dish>();
+    food = new ArrayList<Food>();
   }
 
   ///CONSTRUCTOR USED FOR ALREADY-EXISTING PLAYERS
@@ -48,12 +47,12 @@ public class Player {
     money = m;
     goal = g;
     profit = 0;
-    x = 0;
-    y = 100;
+    x = displayWidth/6;
+    y = displayHeight/6;
     speed = s;
     domes = new ArrayList<ServingDome>();
     menus = new ArrayList<Menu>();
-    dishes = new ArrayList<Dish>();
+    food = new ArrayList<Food>();
   }
 
   public void display() {
@@ -74,23 +73,23 @@ public class Player {
         menus.get(i).setLocation(x, y);
         leftHandEmpty = false;
       } else if (rightHandEmpty) { //then put on right hand
-        menus.get(i).setLocation(x+w, y);
+        menus.get(i).setLocation(x+w/2, y);
         rightHandEmpty = false;
       }
     }
-    for (int i = 0; i < dishes.size (); i++) {
+    for (int i = 0; i < food.size (); i++) {
       if (leftHandEmpty) { //then put on left hand
-        dishes.get(i).setLocation(x, y);
+        food.get(i).setLocation(x, y);
         leftHandEmpty = false;
       } else if (rightHandEmpty) { //then put on right hand
-        dishes.get(i).setLocation(x+w, y);
+        food.get(i).setLocation(x+w/2, y);
         rightHandEmpty = false;
       }
     }
   }
 
-  public boolean holdItem(Clickable c) {
-    if (hold>=2) {
+  public boolean holdItem(Clickable c) { ///adds item to player's hand
+    if (hold>=2) { //if holding 2 or more items, don't do anything
       return false;
     } else {
       if (c.toString().equals("ServingDome")) {
@@ -103,14 +102,42 @@ public class Player {
           menus.add((Menu)c);
           return true;
         }
-      } else if (c.toString().equals("Dish")) {
-        if (dishes.size()<2) {
-          dishes.add((Dish)c);
+      } else if (c.toString().equals("Food")) {
+        if (food.size()<2) {
+          food.add((Food)c);
           return true;
         }
       }
       return false;
     }
+  }
+
+  ///checks to see if the waiter has the dome with the right order number
+  public boolean checkOrderNumber(int o) {
+    for (int i = 0; i < domes.size (); i++) {
+      if (domes.get(i).getOrderNumber()==o) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public void removeDome(int o) {
+    for (int i = 0; i < domes.size (); i++) {
+      if (domes.get(i).getOrderNumber()==o) {
+        domes.remove(i);
+        return;
+      }
+    }
+  }
+  
+  public ServingDome getDome(int o) {
+    for (int i = 0; i < domes.size (); i++) {
+      if (domes.get(i).getOrderNumber()==o) {
+        return domes.get(i);
+      }
+    }
+    return null;
   }
 
   public boolean move(Clickable c) {
@@ -157,7 +184,7 @@ public class Player {
   public int getY() {
     return y;
   }
-  public void setLocation(int a, int b){
+  public void setLocation(int a, int b) {
     x = a;
     y = b;
   }
