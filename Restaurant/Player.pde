@@ -6,7 +6,7 @@ public class Player {
   private String gender;
   private ArrayList<ServingDome> domes;
   private ArrayList<Menu> menus;
-  private ArrayList<Food> food;
+  private ArrayList<Plate> plates;
   private PImage person;
 
   ///DEFAULT CONSTRUCTOR
@@ -29,7 +29,8 @@ public class Player {
     speed = 3;
     domes = new ArrayList<ServingDome>();
     menus = new ArrayList<Menu>();
-    food = new ArrayList<Food>();
+    plates = new ArrayList<Plate>();
+    hold = 0;
   }
 
   ///CONSTRUCTOR USED FOR ALREADY-EXISTING PLAYERS
@@ -52,7 +53,8 @@ public class Player {
     speed = s;
     domes = new ArrayList<ServingDome>();
     menus = new ArrayList<Menu>();
-    food = new ArrayList<Food>();
+    plates = new ArrayList<Plate>();
+    hold = 0;
   }
 
   public void display() {
@@ -73,47 +75,50 @@ public class Player {
         menus.get(i).setLocation(x, y);
         leftHandEmpty = false;
       } else if (rightHandEmpty) { //then put on right hand
-        menus.get(i).setLocation(x+w/2, y);
+        menus.get(i).setLocation(x+w, y);
         rightHandEmpty = false;
       }
     }
-    for (int i = 0; i < food.size (); i++) {
+    for (int i = 0; i < plates.size (); i++) {
       if (leftHandEmpty) { //then put on left hand
-        food.get(i).setLocation(x, y);
+        plates.get(i).setLocation(x, y);
         leftHandEmpty = false;
       } else if (rightHandEmpty) { //then put on right hand
-        food.get(i).setLocation(x+w/2, y);
+        plates.get(i).setLocation(x+w, y);
         rightHandEmpty = false;
       }
+      plates.get(i).display();
     }
   }
 
   public boolean holdItem(Clickable c) { ///adds item to player's hand
-    if (hold>=2) { //if holding 2 or more items, don't do anything
+    if (hold>1) { //if holding 2 or more items, don't do anything
       return false;
     } else {
       if (c.toString().equals("ServingDome")) {
         if (domes.size()<2) {
           domes.add((ServingDome)c);
-          return true;
         }
       } else if (c.toString().equals("Menu")) {
         if (menus.size()<2) {
           menus.add((Menu)c);
-          return true;
         }
-      } else if (c.toString().equals("Food")) {
-        if (food.size()<2) {
-          food.add((Food)c);
-          return true;
+      } else if (c.toString().equals("Plate")) {
+        if (plates.size()<2) {
+          plates.add((Plate)c);
         }
       }
-      return false;
+      hold++;
+      return true;
     }
   }
 
+  public int getHold() {
+    return hold;
+  }
+
   ///checks to see if the waiter has the dome with the right order number
-  public boolean checkOrderNumber(int o) {
+  public boolean checkDomeOrderNumber(int o) {
     for (int i = 0; i < domes.size (); i++) {
       if (domes.get(i).getOrderNumber()==o) {
         return true;
@@ -122,15 +127,46 @@ public class Player {
     return false;
   }
 
+  public void removeOrderNumber(int o) { ///when a customer runs out of patience and leaves, remove all menus/domes with order number
+    removeDome(o);
+    for (int i = 0; i < menus.size (); i++) {
+      if (menus.get(i).getOrderNumber()==o){
+        menus.remove(i);
+        hold--;
+      }
+    }
+  }
+
   public void removeDome(int o) {
     for (int i = 0; i < domes.size (); i++) {
       if (domes.get(i).getOrderNumber()==o) {
         domes.remove(i);
+        hold--;
         return;
       }
     }
   }
-  
+
+  public Menu removeMenu() {
+    for (int i = 0; i < menus.size (); i++) {
+      Menu m = menus.get(i);
+      menus.remove(i);
+      hold--;
+      return m;
+    }
+    return null;
+  }
+
+  public Plate removePlate() {
+    for (int i = 0; i < plates.size (); i++) {
+      Plate pl = plates.get(i);
+      plates.remove(i);
+      hold--;
+      return pl;
+    }
+    return null;
+  }
+
   public ServingDome getDome(int o) {
     for (int i = 0; i < domes.size (); i++) {
       if (domes.get(i).getOrderNumber()==o) {

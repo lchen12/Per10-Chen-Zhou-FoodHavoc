@@ -2,8 +2,7 @@ public class RichMan extends Customer {
   private int tip;
 
   public RichMan() {
-    super("richman.gif", 70, 85);
-    setSpeed(7);
+    super("richman.gif", 70, 85, 90, 7);
   }
 
 

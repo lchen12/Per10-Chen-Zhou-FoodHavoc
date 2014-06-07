@@ -80,6 +80,10 @@ public class Table extends Furniture {
   public int getW(){
     return widthWithChairs;
   }
+  
+  public boolean canAddChair(){
+    return chairs.size() < maxSeats;
+  }
 
   public boolean addChair() {
     if (chairs.size() < maxSeats/2) {
@@ -98,11 +102,11 @@ public class Table extends Furniture {
       seats++;
       return true;
     } else {
-      text("Table has reached maximum capacity. Cannot add anymore chairs.", 0, 0);
+      //text("Table has reached maximum capacity. Cannot add anymore chairs.", 0, 0);
       return false;
     }
   }
-
+  
   public void removeChair() {
     if (chairs.size()>0) {
       chairs.remove(0);

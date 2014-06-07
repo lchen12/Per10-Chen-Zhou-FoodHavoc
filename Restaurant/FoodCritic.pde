@@ -2,8 +2,7 @@ public class FoodCritic extends Customer {
   private int fee;
 
   public FoodCritic() {
-    super("critic.gif", 100, 100);
-    setSpeed(6);
+    super("critic.gif", 100, 100, 80, 6);
   }
 
 

@@ -1,4 +1,5 @@
 //////////OPTIONAL: ADD A PODIUM TO MAKE CUSTOMERS WAITING IN LINE HAPPIER
+//////////////////////WHEN CUSTOMERS LEAVE, MUST REMOVE DOMES FROM HANDS
 
 import java.util.*;
 import java.io.*;
@@ -9,15 +10,15 @@ ArrayList<Furniture> items; ///furniture that the player has already bought
 ArrayList<Party> customers; ///customers to be displayed in game
 ArrayList<Clickable> f; ///clickable stuff to add to game that doesn't belong to any other arraylist?
 LinkedList<Clickable> moves; ///furniture+customers player has clicked on and wants to move to (First In First Out data structure) 
-TextBox txt, mainScreen, stats, cancel;
+TextBox txt, mainScreen, stats, cancel, play, shop, logout;
 Player p;
 Party currentParty;
 ArrayList<String> options; ////list of customer types to choose from
 String state, input, entry, username;
 boolean entered, mouseClicked, chefCooking;
 Clickable current; //item that player just clicked on
-int id, customersToServe, customersWaiting, customersWaitingForFood, lastTimeCheck, timeInterval; //keeps track of how long after the last customers appeared
-PImage image, play, buy;
+int id, maxPartySize, customersToServe, customersWaiting, customersWaitingForFood, lastTimeCheck, timeInterval, lastTimeCustomer, timeAddCustomer; //keeps track of how long after the last customers appeared
+PImage image /*, play, buy*/;
 Random rand;
 
 void setup() {
@@ -34,6 +35,9 @@ void setup() {
   mainScreen = new TextBox("Main Screen", 0, 255, 0, displayWidth-200, 50, 200, 50);
   stats = new TextBox("", 255, 255, 255, displayWidth-200, 100, 200, 300);
   cancel = new TextBox("Cancel", 255, 0, 0, displayWidth-350, 50, 150, 50);
+  play = new TextBox("PLAY", 0, 255, 0, displayWidth/5, displayHeight/4, 150, 50);
+  shop = new TextBox("SHOP", 0, 255, 0, displayWidth/5, displayHeight/2, 150, 50);
+  logout = new TextBox("LOGOUT", 0, 255, 0, displayWidth/5, displayHeight*3/4, 150, 50);
   stats.setSize(20);
   //String[] fontList = PFont.list();
   //println(fontList);
@@ -50,8 +54,12 @@ void setup() {
   options.add("YoungLady");
   options.add("FoodCritic");    
   options.add("CollegeKid");
+  options.add("Old");
   lastTimeCheck = millis();
-  timeInterval = 3000;
+  timeInterval = 2000; //2000
+  lastTimeCustomer = millis();
+  timeAddCustomer = 7000; //7000
+  maxPartySize = 2;
 }
 
 void draw() {
@@ -115,8 +123,10 @@ void draw() {
     seatCustomers();
   } else if (state.equals("endLevel")) {
     endLevel();
-  } else if (state.equals("purchase")) {
-    purchase();
+  } else if (state.equals("shop")) {
+    shop();
+  } else if (state.equals("notEnoughMoney")) {
+    notEnoughMoney();
   } else if (state.equals("purchaseChair")) {
     purchaseChair();
   } else if (state.equals("deleteInventory")) {
@@ -148,21 +158,20 @@ void addToUsersFile(String p) { /////THIS ADDS THE NEW USERNAME+PASSWORD INTO US
 }
 
 void mainScreen() {
-  int x = 200;
-  int y = 200;
-  TextBox play = new TextBox("PLAY", 0, 255, 0, x, y, 150, 50);
-  TextBox purchase = new TextBox("SHOP", 0, 255, 0, x, y+100, 150, 50);
-  TextBox logout = new TextBox("LOGOUT", 0, 255, 0, x, y+200, 150, 50);
+  int x = displayWidth/5;
+  play.display();
+  shop.display();
+  logout.display();
   if (mouseClicked) {
     if (mouseX > x && mouseX < x+150) {
       ///////////if player clicked PLAY button..........
-      if (mouseY > y && mouseY < y+50) {
+      if (mouseY > displayHeight/4 && mouseY < displayHeight/4+50) {
         state = "play";
         ///////////if player clicked SHOP button..........
-      } else if (mouseY > y+100 && mouseY < y+150) {
-        state = "purchase";
+      } else if (mouseY > displayHeight/2 && mouseY < displayHeight/2+50) {
+        state = "shop";
         ///////////if player clicked LOG OUT button..........
-      } else if (mouseY > y+200 && mouseY < y+250) {
+      } else if (mouseY > displayHeight*3/4 && mouseY < displayHeight*3/4+50) {
         f = new ArrayList<Clickable>();
         moves = new LinkedList<Clickable>();
         items = new ArrayList<Furniture>();  
@@ -183,6 +192,11 @@ void confirmMainScreen() {
   if (key == 'y' || key == 'Y') {
     customers = new ArrayList<Party>();
     f = new ArrayList<Clickable>();
+    for (int i = 0; i < items.size (); i++) {
+      if (items.get(i).toString().equals("table")) {
+        ((Table)items.get(i)).setOrderNumber(0);
+      }
+    }
     p.setLocation(0, 100);
     state = "mainScreen";
   } else if (key == 'n' || key == 'N') {
@@ -244,6 +258,7 @@ void setid() {
 ///READS PLAYERS.CSV AND TAKES THE NUMBERS///////////////////
 void initiatePlayer() {
   String[] lines = loadStrings("players.csv");
+  println(id);
   if (lines[id].equals("null")) {
     state = "choosePlayer";
     return;
@@ -253,11 +268,17 @@ void initiatePlayer() {
   ////updates Stats textbox
   updateStats();
   customersToServe = 3+2*p.getLevel();
+  maxPartySize = 2+p.getLevel()/3;
 }
 
 ////updates Stats textbox
 void updateStats() {
-  stats.set("Name: "+username+"\nLevel: "+p.getLevel()+"\nMoney: "+p.getMoney()+"\nSpeed: "+p.getSpeed()+"\nProfit: "+p.getProfit()+"\nGoal: "+p.getGoal());
+  if (p==null) {
+    state = "choosePlayer";
+    return;
+  } else {
+    stats.set("Name: "+username+"\nLevel: "+p.getLevel()+"\nMoney: "+p.getMoney()+"\nSpeed: "+p.getSpeed()+"\nProfit: "+p.getProfit()+"\nGoal: "+p.getGoal());
+  }
 }
 
 void makeUsername() {
@@ -304,12 +325,15 @@ void choosePlayer() {
   txt.set("Would you like your server to be male(m) or female(f)? Type m or f.");
   if (key == 'm' || key == 'M') {
     p = new Player("male");
+    customersToServe = 5; //total number of parties to be served in each round; based on level
+    state = "mainScreen";
+    savePlayer();
   } else if (key == 'f' || key == 'F') {
     p = new Player("female");
+    customersToServe = 5; //total number of parties to be served in each round; based on level
+    state = "mainScreen";
+    savePlayer();
   }
-  customersToServe = 5; //total number of parties to be served in each round; based on level
-  state = "play";
-  savePlayer();
 }
 
 ///SAVES PLAYER INTO PLAYERS.CSV///////////////////
@@ -324,8 +348,9 @@ void savePlayer() {
 /////////////ADDS BASIC FURNITURE AND SAVES THEM INTO FILE FOR FUTURE REFERENCE
 void startFurniture() {
   PrintWriter output = createWriter("users/"+username+".csv");
-  output.println("table,400,500,4,2");
-  output.println("trashBin,700,300");
+  output.println("table,"+displayWidth/2+",500,4,2");
+  output.println("trashBin,"+(displayWidth-displayWidth/4)+","+(displayHeight-displayHeight/5));
+  output.println("orderHolder,"+(displayWidth-displayWidth/5)+",150");
   output.flush();
   output.close();
 }
@@ -340,6 +365,8 @@ void setFurniture() {
       items.add(new Coffee(Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
     } else if (variables[0].equals("trashBin")) {
       items.add(new TrashBin(Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
+    } else if (variables[0].equals("orderHolder")) {
+      items.add(new OrderHolder(Integer.parseInt(variables[1]), Integer.parseInt(variables[2])));
     } else if (variables[0].equals("table")) {
       items.add(new Table(Integer.parseInt(variables[1]), Integer.parseInt(variables[2]), Integer.parseInt(variables[3]), Integer.parseInt(variables[4])));
     }
@@ -363,7 +390,7 @@ void saveFurniture() {
 }
 
 
-void purchase() {
+void shop() {
   txt.set("Click on an item you would like to purchase.");
   //int sizeBefore = f.size();
   int cols = 5;
@@ -414,20 +441,17 @@ void purchaseChair() {
   if (mouseClicked) {
     ///if player clicked on cancel button........
     if (mouseX >= displayWidth-350 && mouseY <= 100) {
-      state = "purchase";
+      state = "shop";
     } else {
       if (current!=null && current.toString().equals("table")) {
         Table a = (Table) current;
-        if (a.addChair()) {
-          if (p.addMoney(-(a.getPrice()))) {
-            saveFurniture();
-            savePlayer();
-            state = "purchase";
-          } else {
-            a.removeChair();
-            a.removeChair();
-            a.addChair();
-          }
+        if (a.canAddChair() && p.addMoney(-(a.getPrice()))) {
+          a.addChair();
+          saveFurniture();
+          savePlayer();
+          state = "shop";
+        } else {
+          state = "notEnoughMoney";
         }
         current = null;
       }
@@ -437,6 +461,13 @@ void purchaseChair() {
   updateStats();
 }
 
+void notEnoughMoney() {
+  txt.set("You do not have enough money to purchase this item. Type (y) to go back.");
+  if (key == 'y' || key == 'Y') {
+    input = "";
+    state = "shop";
+  }
+}
 
 void displayPrice(Furniture a) {
   textSize(20);
@@ -460,16 +491,16 @@ void setPurchase() {
       if (p.addMoney(-price)) {
         saveFurniture();
         savePlayer();
+        state = "shop";
+      } else {
+        items.remove(items.size()-1);
+        state = "notEnoughMoney";
       }
     }
-    state = "purchase";
-    ////////////TO DO: NOTIFY PLAYER THAT HE DOESN'T HAVE ENOUGH $$ TO PURCHASE ITEM
     mouseClicked = false;
   }
   updateStats();
 }
-
-
 
 void keyPressed() {
   //print(input.indexOf('?'));
@@ -508,23 +539,35 @@ void deleteInventory() {
 
 void play() {
   txt.set("When a customer arrives, click on the customer, click on a table, and start serving!");
-  p.display();  
+  p.display();    
+  ////////////IF PLAYER ISN'T HOLDING ANYTHING AND NO MORE CUSTOMERS////////////////////////////////
+  if (p.getHold()==0 && customers.size()==0 && customersToServe==0) {
+    savePlayer(); //save player's stats
+    state = "endLevel";
+  }
+  if ( millis() > lastTimeCustomer + timeAddCustomer ) { /////add a customer every (timeCustomer/1000) seconds
+    lastTimeCustomer = millis();
+    if (customersToServe > 0) { ////if maximum number of customers isn't reached yet...
+      int x = displayWidth/8;
+      if (customersWaiting > 10) {
+        x = displayWidth/32;
+      } else if (customersWaiting > 5) {
+        x = displayWidth/16;
+      }
+      int picker = rand.nextInt(options.size());
+      String type = options.get(picker);
+      if (type.equals("Old")) {
+        customers.add(new OldParty(rand, maxPartySize, x, 120+(customersWaiting%5)*150));
+      } else {
+        customers.add(new Party(rand, maxPartySize, x, 120+(customersWaiting%5)*150, type));
+      }
+      customersWaiting++;
+      customersToServe--;
+    }
+  }
   if ( millis() > lastTimeCheck + timeInterval ) {
     lastTimeCheck = millis();
     //////////////////////////////////////////////////////////
-    if (customersToServe > 0) { ////if maximum number of customers isn't reached yet...
-      if (customersWaiting < 5) {
-        int picker = rand.nextInt(options.size());
-        String type = options.get(picker);
-        if (type.equals("Old")) {
-          customers.add(new OldParty(rand, 4, displayWidth/8, 100+customersWaiting*150));
-        } else {
-          customers.add(new Party(rand, 4, displayWidth/8, 120+customersWaiting*150, type));
-        }
-        customersWaiting++;
-        customersToServe--;
-      }
-    }
     for (int i = 0; i < customers.size (); i++) {
       Party party = customers.get(i);
       party.decrease(); //decrease patience of each party every few seconds
@@ -533,8 +576,10 @@ void play() {
           customersWaiting--;
         }
         p.addProfit(party.getSize()*(-250));
+        removeOrderNumber(party);
         customers.remove(i);
       }
+      party.increaseTime();
     }
     for (int i = 0; i < f.size (); i++) {
       if (f.get(i).toString().equals("Chef")) {
@@ -546,7 +591,6 @@ void play() {
         }
       }
     }
-    println(lastTimeCheck/1000);
   }
   if (mouseClicked) {
     if (current!=null) {
@@ -570,45 +614,92 @@ void play() {
       println(c);
       if (customers.contains(c)) {
         currentParty = (Party)c;
-        if (currentParty.getState().equals("ordering")) {
-          currentParty.setState("waitingForFood");
-          customersWaitingForFood++;
-          currentParty.getTable().setOrderNumber(customersWaitingForFood);
-          currentParty.setPatience(100);
-          f.add(new Chef(displayWidth*5/6+customersWaitingForFood*50, displayHeight/7+100*customersWaitingForFood, currentParty.getTable().getOrderNumber())); //creates a chef near the dome
-          p.addProfit(20);
-        } else if (currentParty.getState().equals("waitingForFood")) {
-          if (p.checkOrderNumber(currentParty.getTable().getOrderNumber())) { ////if player is holding a dome with the same order number as party
-            f.remove(p.getDome(currentParty.getTable().getOrderNumber()));
-            p.removeDome(currentParty.getTable().getOrderNumber());
-            customersWaitingForFood--;
-            currentParty.getTable().setOrderNumber(0);
-            currentParty.setState("eating");          
-            currentParty.setPatience(100);
-            p.addProfit(30);
-          }
-        } else if (currentParty.getState().equals("eating")) {
-          currentParty.getTable().unoccupy();
-          customers.remove(currentParty);
-          p.addProfit(40);
-          p.addMoney(currentParty.getPatience()/20);
-
-          //////IF THAT WAS THE LAST CUSTOMER.........
-          if (customers.size()==0 && customersToServe==0) {
-            p.level();
-            savePlayer(); //save player's stats
-            state = "endLevel";
+        if (currentParty.isReady()) {
+          if (currentParty.getState().equals("ordering")) {
+            if (p.getHold()<2) {              
+              currentParty.removeMenus();
+              currentParty.setState("waitingForFood");
+              customersWaitingForFood++;
+              currentParty.getTable().setOrderNumber(customersWaitingForFood);
+              currentParty.addPatience();
+              Menu m = new Menu(100, 100, currentParty.getTable().getOrderNumber());
+              f.add(m);
+              p.holdItem(m);
+            }
+            p.addProfit(20);
+          } else if (currentParty.getState().equals("waitingForFood")) {
+            if (p.checkDomeOrderNumber(currentParty.getTable().getOrderNumber())) { ////if player is holding a dome with the same order number as party
+              f.remove(p.getDome(currentParty.getTable().getOrderNumber()));
+              p.removeDome(currentParty.getTable().getOrderNumber());
+              customersWaitingForFood--;
+              currentParty.getTable().setOrderNumber(0);
+              ///put food on table
+              currentParty.setState("eating");          
+              currentParty.addPatience();
+              p.addProfit(30);
+            }
+          } else if (currentParty.getState().equals("eating")) {
+            currentParty.getTable().unoccupy();
+            p.addProfit(40);
+            currentParty.setState("done");
+          } else if (currentParty.getState().equals("done")) {
+            p.addProfit(50);
+            p.addMoney(currentParty.getPatience()/20);
+            customers.remove(currentParty);
+            Plate pl = new Plate(0, 0);
+            f.add(pl);
+            p.holdItem(pl);
           }
         }
       } else if (f.contains(c)) { ////f is the array of Clickables that doesn't belong to items or customers; it has ServingDomes, food plates, etc...
         if (c.toString().equals("ServingDome")) {
           p.holdItem(c);
         }
+      } else if (items.contains(c)) {
+        if (c.toString().equals("orderHolder")) {
+          Menu m = p.removeMenu();
+          if (m!=null) {
+            f.remove(m);
+            print(m.getOrderNumber());
+            f.add(new Chef(displayWidth*5/6+m.getOrderNumber()*50, displayHeight/7+100*m.getOrderNumber(), m.getOrderNumber())); //creates a chef near the dome
+            m = p.removeMenu();
+            if (m!=null) {
+              f.remove(m);
+              f.add(new Chef(displayWidth*5/6+m.getOrderNumber()*50, displayHeight/7+100*m.getOrderNumber(), m.getOrderNumber())); //creates a chef near the dome
+            }
+          }
+        } else if (c.toString().equals("trashBin")) {
+          Plate pl = p.removePlate();
+          if (pl!=null) {
+            f.remove(pl);
+            pl = p.removePlate();
+            if (pl!=null) {
+              f.remove(pl);
+            }
+          }
+        }
       }
       moves.remove();
     }
   }
   updateStats();
+}
+
+///removes all domes or menus associated with the leaving party's order number
+void removeOrderNumber(Party party) {
+  if (party.getTable()!=null) {
+    int orderNumber = party.getTable().getOrderNumber();
+    p.removeOrderNumber(orderNumber);
+    party.getTable().setOrderNumber(0);
+    for (int i = 0; i < f.size (); i++) {
+      Clickable object = f.get(i);
+      if (object.toString().equals("ServingDome") && ((ServingDome)object).getOrderNumber()==orderNumber) {
+        f.remove(i);
+      } else if (object.toString().equals("Menu") && ((Menu)object).getOrderNumber()==orderNumber) {
+        f.remove(i);
+      }
+    }
+  }
 }
 
 void seatCustomers() {
@@ -631,8 +722,9 @@ void seatCustomers() {
         t.occupy();
         currentParty.setLocation(t);
         currentParty.setState("ordering");
+        currentParty.addMenus();
         customersWaiting--;
-        currentParty.setPatience(100);
+        currentParty.addPatience();
         state = "play";
       }
       current = null;
@@ -645,6 +737,7 @@ void endLevel() {
   if (p.getProfit()<p.getGoal()) {
     txt.set("Darn! You didn't earn enough to reach your goal, but don't lose hope! Practice makes perfect.");
   } else {    
+    p.level();
     txt.set("Congratulations! You are now level "+p.getLevel()+"! Keep up the good work!");
   }
 }
@@ -659,6 +752,8 @@ void mouseReleased() {
     if (state.equals("play") || state.equals("seatCustomers")) {
       state = "confirmMainScreen";
     } else {
+      customers = new ArrayList<Party>();
+      f = new ArrayList<Clickable>();
       state = "mainScreen";
     }
     return;

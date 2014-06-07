@@ -1,10 +1,10 @@
 public class Customer extends Clickable {
+  
   private int patience, speed;
-
-
-  public Customer(String gif, int w, int h) {
+  
+  public Customer(String gif, int w, int h, int p, int s) {
     super(gif, w, h);
-    patience = 100;
+    patience = p;
     speed = 10;
   }
 
