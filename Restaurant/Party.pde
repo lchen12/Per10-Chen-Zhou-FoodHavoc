@@ -133,7 +133,7 @@ public class Party extends Clickable {
   }
 
   public void decrease() {
-    if (timeSpent>=speed) {  ///if customer is ready and waiting, i.e. isn't ordering or eating, then decrease patience.
+    if (timeSpent>=speed && !state.equals("done")) {  ///if customer is ready and waiting, i.e. isn't ordering or eating or finished eating, then decrease patience.
       patience-=2;
     }
   }

@@ -1,14 +1,14 @@
-public class Coffee extends Furniture {
+public class Coffee extends Clickable {
 
   public Coffee() {
-    super(20, "coffee.gif", 36, 50);
+    super("coffee.gif", 20, 25);
   }
 
   public Coffee(int x, int y) {
-    super(20, "coffee.gif", 36, 50, x, y);
+    super("coffee.gif", 20, 25, x, y);
   }
   public String toString() {
-    return "coffee";
+    return "Coffee";
   }
 }
 

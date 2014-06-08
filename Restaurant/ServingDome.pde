@@ -1,9 +1,9 @@
-public class ServingDome extends Furniture {
+public class ServingDome extends Clickable {
 
   private int orderNumber;
   
   public ServingDome(int x, int y, int o) {
-    super(0, "servingDome.gif", 50, 25, x, y);
+    super("servingDome.gif", 50, 25, x, y);
     orderNumber = o;
   }
   

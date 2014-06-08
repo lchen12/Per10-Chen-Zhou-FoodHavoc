@@ -2,11 +2,14 @@
 ///////////////ALSO ADD CHAIN FEATURE
 
 public class Player {
-  private int level, money, goal, profit, x, y, speed, w, h, hold; //hold = # of items player is holding; can't be more than 2
-  private String gender;
+  private int level, money, goal, profit, x, y, speed, w, h, hold, streakNum, updateTime, updateTimeMax; //hold = # of items player is holding; can't be more than 2
+  private String gender, streakType, updateProfit;
   private ArrayList<ServingDome> domes;
   private ArrayList<Menu> menus;
   private ArrayList<Plate> plates;
+  private ArrayList<Coffee> coffee;
+  private boolean hasCoffee;
+  
   private PImage person;
 
   ///DEFAULT CONSTRUCTOR
@@ -30,7 +33,14 @@ public class Player {
     domes = new ArrayList<ServingDome>();
     menus = new ArrayList<Menu>();
     plates = new ArrayList<Plate>();
+    coffee = new ArrayList<Coffee>();
+    hasCoffee = false;
     hold = 0;
+    streakNum = 0;
+    streakType = "";
+    updateProfit = ""; ///////tells player how much profit or tips player has earned
+    updateTime = 0; //////time elapsed since update has popped up
+    updateTimeMax = 2;
   }
 
   ///CONSTRUCTOR USED FOR ALREADY-EXISTING PLAYERS
@@ -54,7 +64,14 @@ public class Player {
     domes = new ArrayList<ServingDome>();
     menus = new ArrayList<Menu>();
     plates = new ArrayList<Plate>();
+    coffee = new ArrayList<Coffee>();
+    hasCoffee = false;
     hold = 0;
+    streakNum = 0;
+    streakType = "";
+    updateProfit = ""; ///////tells player how much profit or tips player has earned
+    updateTime = 0; //////time elapsed since update has popped up
+    updateTimeMax = 2;
   }
 
   public void display() {
@@ -89,6 +106,19 @@ public class Player {
       }
       plates.get(i).display();
     }
+    for (int i = 0; i < coffee.size (); i++) {
+      if (leftHandEmpty) { //then put on left hand
+        coffee.get(i).setLocation(x, y);
+        leftHandEmpty = false;
+      } else if (rightHandEmpty) { //then put on right hand
+        coffee.get(i).setLocation(x+w, y);
+        rightHandEmpty = false;
+      }
+      coffee.get(i).display();
+    }
+    if (updateTime<updateTimeMax){
+      text(updateProfit, x, y+h+20);
+    }
   }
 
   public boolean holdItem(Clickable c) { ///adds item to player's hand
@@ -107,6 +137,11 @@ public class Player {
         if (plates.size()<2) {
           plates.add((Plate)c);
         }
+      } else if (c.toString().equals("Coffee")) {
+        if (coffee.size()<2) {
+          coffee.add((Coffee)c);
+        }
+        hasCoffee = true;
       }
       hold++;
       return true;
@@ -130,7 +165,7 @@ public class Player {
   public void removeOrderNumber(int o) { ///when a customer runs out of patience and leaves, remove all menus/domes with order number
     removeDome(o);
     for (int i = 0; i < menus.size (); i++) {
-      if (menus.get(i).getOrderNumber()==o){
+      if (menus.get(i).getOrderNumber()==o) {
         menus.remove(i);
         hold--;
       }
@@ -155,6 +190,23 @@ public class Player {
       return m;
     }
     return null;
+  }
+  
+  public Coffee removeCoffee() {
+    for (int i = 0; i < coffee.size (); i++) {
+      Coffee c = coffee.get(i);
+      coffee.remove(i);
+      hold--;
+      if (coffee.size()==0){
+        hasCoffee = false;
+      }
+      return c;
+    }
+    return null;
+  }
+  
+  public boolean hasCoffee(){
+    return hasCoffee;
   }
 
   public Plate removePlate() {
@@ -224,12 +276,15 @@ public class Player {
     x = a;
     y = b;
   }
+
   public int getSpeed() {
     return speed;
   }
   public void level() {
     level++;
     goal+=level*100;
+    profit = 0;
+    speed++;
   }
   public boolean addMoney(int m) {
     if (money+m < 0) {
@@ -238,12 +293,53 @@ public class Player {
     money+=m;
     return true;
   }
-  public boolean addProfit(int p) {
-    if (profit+p < 0) {
-      return false;
-    }
-    profit+=p;
-    return true;
+  public void resetProfit(){
+    profit = 0;
   }
+  public void addProfit(int p) {    
+    profit+=p;
+  }
+  public void addProfit(String s) {    
+    int p = 0; ///how much profit to add, based on the type of service acted
+    setStreak(s);
+    if (s.equals("ordering")) {
+      p = 20;
+      updateProfit(20);
+    } else if (s.equals("waitingForFood")) {
+      p = 30;
+      updateProfit(30);
+    } else if (s.equals("eating")) {
+      p = 50;
+      updateProfit(50);
+    } else if (s.equals("done")) {
+      p = 40;
+      updateProfit(40);
+    }
+    profit+=p*streakNum;
+    println(streakType+", "+streakNum);
+  }
+  public void setStreak(String s) {
+    if (streakType.equals(s)) {
+      streakNum++;
+    } else {
+      streakType = s;
+      streakNum=1;
+    }
+  }
+  
+  public void updateProfit(int p) {
+    updateTime = 0;
+    updateProfit = "Profit: "+p+"x"+streakNum;
+  }
+  public void updateTips(int t) {
+    updateProfit+= "\nTips: $"+t;
+  }
+  
+  public void updateTime() {
+    if (updateTime < updateTimeMax) {
+      updateTime++;
+    }
+  }
+  
 }
 

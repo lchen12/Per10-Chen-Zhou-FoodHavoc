@@ -1,7 +1,7 @@
-public class Plate extends Furniture {
+public class Plate extends Clickable {
 
   public Plate(int x, int y) {
-    super(0, "plate.gif", 30, 9, x, y);
+    super("plate.gif", 30, 9, x, y);
   }
   
   public String toString() {
