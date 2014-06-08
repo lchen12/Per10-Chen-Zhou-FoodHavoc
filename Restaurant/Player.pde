@@ -1,6 +1,3 @@
-////////////REMEMBER TO ADD COFFEE FEATURE
-///////////////ALSO ADD CHAIN FEATURE
-
 public class Player {
   private int level, money, goal, profit, x, y, speed, w, h, hold, streakNum, updateTime, updateTimeMax; //hold = # of items player is holding; can't be more than 2
   private String gender, streakType, updateProfit;
@@ -9,7 +6,7 @@ public class Player {
   private ArrayList<Plate> plates;
   private ArrayList<Coffee> coffee;
   private boolean hasCoffee;
-  
+
   private PImage person;
 
   ///DEFAULT CONSTRUCTOR
@@ -44,7 +41,7 @@ public class Player {
   }
 
   ///CONSTRUCTOR USED FOR ALREADY-EXISTING PLAYERS
-  public Player(String gender, int l, int m, int g, int s) {
+  public Player(String gender, int l, int m, int s) {
     if (gender.equals("female")) {
       person = loadImage("waitress.gif");
     } else if (gender.equals("male")) {
@@ -56,7 +53,7 @@ public class Player {
     person.resize(w, h);
     level = l;
     money = m;
-    goal = g;
+    goal = 500+factorial(level)*100;
     profit = 0;
     x = displayWidth/6;
     y = displayHeight/6;
@@ -116,7 +113,7 @@ public class Player {
       }
       coffee.get(i).display();
     }
-    if (updateTime<updateTimeMax){
+    if (updateTime<updateTimeMax) {
       text(updateProfit, x, y+h+20);
     }
   }
@@ -191,21 +188,21 @@ public class Player {
     }
     return null;
   }
-  
+
   public Coffee removeCoffee() {
     for (int i = 0; i < coffee.size (); i++) {
       Coffee c = coffee.get(i);
       coffee.remove(i);
       hold--;
-      if (coffee.size()==0){
+      if (coffee.size()==0) {
         hasCoffee = false;
       }
       return c;
     }
     return null;
   }
-  
-  public boolean hasCoffee(){
+
+  public boolean hasCoffee() {
     return hasCoffee;
   }
 
@@ -282,9 +279,15 @@ public class Player {
   }
   public void level() {
     level++;
-    goal+=level*100;
-    profit = 0;
+    goal = 500+factorial(level)*100;
     speed++;
+  }
+  public int factorial(int n) {
+    if (n == 1) {
+      return n;
+    } else {
+      return n * factorial(n-1);
+    }
   }
   public boolean addMoney(int m) {
     if (money+m < 0) {
@@ -293,7 +296,7 @@ public class Player {
     money+=m;
     return true;
   }
-  public void resetProfit(){
+  public void resetProfit() {
     profit = 0;
   }
   public void addProfit(int p) {    
@@ -326,7 +329,7 @@ public class Player {
       streakNum=1;
     }
   }
-  
+
   public void updateProfit(int p) {
     updateTime = 0;
     updateProfit = "Profit: "+p+"x"+streakNum;
@@ -334,12 +337,11 @@ public class Player {
   public void updateTips(int t) {
     updateProfit+= "\nTips: $"+t;
   }
-  
+
   public void updateTime() {
     if (updateTime < updateTimeMax) {
       updateTime++;
     }
   }
-  
 }
 

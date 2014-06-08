@@ -34,18 +34,23 @@ public class Table extends Furniture {
   public void display() {
     super.display();
     if (chairs!=null) {
-      for (Chair c : chairs) {
-        c.display();
+      for (int i = 0; i < chairs.size (); i++) {
+        if (i < maxSeats/2) {
+          chairs.get(i).setLocation(getX()-50, getY()+50*(i%(maxSeats/2)));
+        } else if (i < maxSeats) {
+          chairs.get(i).setLocation(getX()+75, getY()+50*(i%(maxSeats/2)));
+        }
+        chairs.get(i).display();
       }
     }
     ////////make a small white square with ordernumber on it
-    if (orderNumber!=0){      
-      fill(255,255,255);
-      rect(getX()+getW()/4, getY(), 25,25);
+    if (orderNumber!=0) {      
+      fill(255, 255, 255);
+      rect(getX()+getW()/4, getY(), 25, 25);
       //textFont(f);
       fill(50);
       //textSize(100);
-      text(orderNumber,getX()+getW()/4+8, getY()+getY()/20);
+      text(orderNumber, getX()+getW()/4+8, getY()+getY()/20);
     }
   }
 
@@ -72,30 +77,29 @@ public class Table extends Furniture {
   public void unoccupy() {
     occupied = false;
   }
-  
-  public boolean isOccupied(){
+
+  public boolean isOccupied() {
     return occupied;
   }
-  
-  public int getW(){
+
+  public int getW() {
     return widthWithChairs;
   }
-  
-  public boolean canAddChair(){
+
+  public boolean canAddChair() {
     return chairs.size() < maxSeats;
   }
 
   public boolean addChair() {
     if (chairs.size() < maxSeats/2) {
-      if (chairs.size() == 0){
-        setLocation(getX()-50,getY());
+      if (chairs.size() == 0) {
         widthWithChairs+=50;
       }
       chairs.add(new Chair(getX()-50, getY()+50*(chairs.size()%(maxSeats/2)), "faceRight"));
       seats++;
       return true;
     } else if (chairs.size() < maxSeats) {
-      if (chairs.size() == maxSeats/2){
+      if (chairs.size() == maxSeats/2) {
         widthWithChairs+=50;
       }
       chairs.add(new Chair(getX()+75, getY()+50*(chairs.size()%(maxSeats/2)), "faceLeft"));
@@ -106,7 +110,7 @@ public class Table extends Furniture {
       return false;
     }
   }
-  
+
   public void removeChair() {
     if (chairs.size()>0) {
       chairs.remove(0);
