@@ -58,9 +58,9 @@ void setup() {
   options.add("CollegeKid");
   options.add("Old");
   lastTimeCheck = millis();
-  timeInterval = 500; //2000
+  timeInterval = 2000; //2000
   lastTimeCustomer = millis();
-  timeAddCustomer = 1000; //7000
+  timeAddCustomer = 7000; //7000
   maxPartySize = 2;
   newGame = true;
 }
