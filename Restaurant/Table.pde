@@ -2,17 +2,19 @@ public class Table extends Furniture {
 
   //private PFont f;
   private boolean occupied;
-  private int seats, maxSeats, orderNumber, widthWithChairs;
+  private int seats, maxSeats, orderNumber, widthWithChairs, realH;
   private ArrayList<Chair> chairs;
 
   ///CONSTRUCTOR FOR NEW TABLE
   public Table(int ms) {
     super(20, "woodTable.gif", 100, 100);
+    widthWithChairs = 100;
     maxSeats = ms;
     seats = 0;
     chairs = new ArrayList<Chair>();
     occupied = false;
     orderNumber = 0;
+    realH = 100;
     //f = createFont("Arial", 10);
   }
 
@@ -28,20 +30,26 @@ public class Table extends Furniture {
     }
     occupied = false;
     orderNumber = 0;
+    realH = 75+25*(ms/4);
     //f = createFont("Arial", 10);
   }
 
   public void display() {
-    super.display();
     if (chairs!=null) {
       for (int i = 0; i < chairs.size (); i++) {
         if (i < maxSeats/2) {
-          chairs.get(i).setLocation(getX()-50, getY()+50*(i%(maxSeats/2)));
+          chairs.get(i).setLocation(getX()-50+2*(i%(maxSeats/2)), getY()+25*(i%(maxSeats/2)));
         } else if (i < maxSeats) {
-          chairs.get(i).setLocation(getX()+75, getY()+50*(i%(maxSeats/2)));
+          chairs.get(i).setLocation(getX()+90+2*(i%(maxSeats/2)), getY()+25*(i%(maxSeats/2)));
         }
         chairs.get(i).display();
       }
+    }
+    super.display();
+    for (int i = 1; i < maxSeats/4; i++){
+      PImage img = loadImage("woodTable.gif");
+      img.resize(100,100);
+      image(img, getX()+i*5, getY()+i*25);
     }
     ////////make a small white square with ordernumber on it
     if (orderNumber!=0) {      
@@ -85,6 +93,10 @@ public class Table extends Furniture {
   public int getW() {
     return widthWithChairs;
   }
+  
+  public int getH() {
+    return realH;
+  }
 
   public boolean canAddChair() {
     return chairs.size() < maxSeats;
@@ -95,14 +107,14 @@ public class Table extends Furniture {
       if (chairs.size() == 0) {
         widthWithChairs+=50;
       }
-      chairs.add(new Chair(getX()-50, getY()+50*(chairs.size()%(maxSeats/2)), "faceRight"));
+      chairs.add(new Chair(getX()-50+2*(chairs.size()%(maxSeats/2)), getY()+25*(chairs.size()%(maxSeats/2)), "faceRight"));
       seats++;
       return true;
     } else if (chairs.size() < maxSeats) {
       if (chairs.size() == maxSeats/2) {
         widthWithChairs+=50;
       }
-      chairs.add(new Chair(getX()+75, getY()+50*(chairs.size()%(maxSeats/2)), "faceLeft"));
+      chairs.add(new Chair(getX()+90+2*(chairs.size()%(maxSeats/2)), getY()+25*(chairs.size()%(maxSeats/2)), "faceLeft"));
       seats++;
       return true;
     } else {
@@ -116,6 +128,11 @@ public class Table extends Furniture {
       chairs.remove(0);
       seats--;
     }
+  }
+  
+  public void expand(){
+    maxSeats += 4;
+    realH += 25;
   }
 
   public String toString() {

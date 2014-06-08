@@ -37,8 +37,8 @@ public class Clickable {
   }
 
   public boolean over() {
-    if (mouseX >= x && mouseX <= x+w &&
-      mouseY >= y && mouseY <= y+h) {
+    if (mouseX >= x && mouseX <= x+getW() &&
+      mouseY >= y && mouseY <= y+getH()) {
       //isOver = true;
       return true;
     } else {

@@ -1,8 +1,8 @@
 //party for the 2 old people
 public class OldParty extends Party {
 
-  public OldParty(Random rand, int max, int x, int y) {
-    super(rand, max, x, y, "YoungLady");
+  public OldParty(Random rand, int max, int x, int y, Player p) {
+    super(rand, max, x, y, "YoungLady", p);
     ArrayList<Customer> c = new ArrayList<Customer>();
     OldLady ol = new OldLady();
     ol.setLocation(x, y);
@@ -25,6 +25,9 @@ public class OldParty extends Party {
       size(2*getW(), getH());
     }
     setCustomers(c);
+    setMaxPatience((int)(customers.get(0).getPatience()*p.getPatienceFactor()));
+    setPatience(getMaxPatience());
+    //setSpeed(customers.get(0).getSpeed()*p.getCustomerSpeedFactor());
   }
 }
 

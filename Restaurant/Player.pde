@@ -1,11 +1,12 @@
 public class Player {
-  private int level, money, goal, profit, x, y, speed, w, h, hold, streakNum, updateTime, updateTimeMax; //hold = # of items player is holding; can't be more than 2
+  private int level, money, goal, profit, x, y, w, h, hold, streakNum, updateTime, updateTimeMax; //hold = # of items player is holding; can't be more than 2
   private String gender, streakType, updateProfit;
   private ArrayList<ServingDome> domes;
   private ArrayList<Menu> menus;
   private ArrayList<Plate> plates;
   private ArrayList<Coffee> coffee;
   private boolean hasCoffee;
+  private double speed, chefTimeCook, patienceFactor, customerSlowFactor;
 
   private PImage person;
 
@@ -26,7 +27,10 @@ public class Player {
     profit = 0;
     x = displayWidth/6;
     y = displayHeight/6;
-    speed = 3;
+    speed = 3.0;
+    chefTimeCook = 700;
+    patienceFactor = 1.0;
+    customerSlowFactor = 1.0;
     domes = new ArrayList<ServingDome>();
     menus = new ArrayList<Menu>();
     plates = new ArrayList<Plate>();
@@ -41,7 +45,7 @@ public class Player {
   }
 
   ///CONSTRUCTOR USED FOR ALREADY-EXISTING PLAYERS
-  public Player(String gender, int l, int m, int s) {
+  public Player(String gender, int l, int m, double s, double ct, double pf, double cs) {
     if (gender.equals("female")) {
       person = loadImage("waitress.gif");
     } else if (gender.equals("male")) {
@@ -53,11 +57,14 @@ public class Player {
     person.resize(w, h);
     level = l;
     money = m;
-    goal = 500+factorial(level)*100;
+    goal = 400+factorial(level)*100;
     profit = 0;
     x = displayWidth/6;
     y = displayHeight/6;
     speed = s;
+    chefTimeCook = ct;
+    patienceFactor = pf;
+    customerSlowFactor = cs;
     domes = new ArrayList<ServingDome>();
     menus = new ArrayList<Menu>();
     plates = new ArrayList<Plate>();
@@ -273,14 +280,33 @@ public class Player {
     x = a;
     y = b;
   }
-
-  public int getSpeed() {
+  public double getSpeed() {
     return speed;
+  }
+  public void increaseSpeed() {
+    speed+=speed/5;
+  }
+  public double getPatienceFactor() {
+    return patienceFactor;
+  }
+  public void increasePatienceFactor() {
+    patienceFactor+=patienceFactor/10;
+  }
+  public double getCustomerSlowFactor() {
+    return customerSlowFactor;
+  }
+  public void decreaseCustomerSlowFactor() {
+    customerSlowFactor-=customerSlowFactor/10;
+  }
+  public double getChefTimeCook(){
+    return chefTimeCook;
+  }
+  public void decreaseChefTimeCook(){
+    chefTimeCook-=chefTimeCook/5;
   }
   public void level() {
     level++;
     goal = 500+factorial(level)*100;
-    speed++;
   }
   public int factorial(int n) {
     if (n == 1) {
@@ -290,6 +316,7 @@ public class Player {
     }
   }
   public boolean addMoney(int m) {
+    println(m);
     if (money+m < 0) {
       return false;
     }

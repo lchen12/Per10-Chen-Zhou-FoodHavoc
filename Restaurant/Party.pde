@@ -3,13 +3,14 @@ public class Party extends Clickable {
   private ArrayList<Customer> customers;
   private ArrayList<Menu> menus;
   private ArrayList<Food> food;
-  private int size, patience, maxPatience, speed, timeSpent; ///timeSpent keeps track of how long customer has left to order, eat, etc...
+  private int size, patience, maxPatience, timeSpent; ///timeSpent keeps track of how long customer has left to order, eat, etc...
+  private double speed;
   private String type, state; //STATES: "WAITING" "ORDERING" "WAITINGFORFOOD" "EATING" "DONE"
   private Table table;
   private boolean ready;
   private ThoughtBubble thoughtBubble;
 
-  public Party(Random rand, int max, int x, int y, String type) {
+  public Party(Random rand, int max, int x, int y, String type, Player p) {
     super(x, y);
     size = rand.nextInt(max)+1;
     customers = new ArrayList<Customer>();
@@ -45,12 +46,12 @@ public class Party extends Clickable {
       }
     }
     this.type = type;
-    maxPatience = customers.get(0).getPatience();
+    maxPatience = (int)(customers.get(0).getPatience()*p.getPatienceFactor());
     patience = maxPatience;
-    speed = customers.get(0).getSpeed();
+    speed = customers.get(0).getSpeed()*p.getCustomerSlowFactor();
     state = "waiting";
     table = null;
-    timeSpent = speed;
+    timeSpent = (int)speed;
     ready = true;
     thoughtBubble = new ThoughtBubble(getX()+getW()/2, getY()-10);
   }
@@ -113,12 +114,20 @@ public class Party extends Clickable {
     return maxPatience;
   }
 
+  public void setMaxPatience(int p) {
+    maxPatience = p;
+  }
+  
   public void setPatience(int p) {
     if (p <= maxPatience) {
       patience = p;
     } else {
       patience = maxPatience;
     }
+  }
+  
+  public void setSpeed(double s){
+    speed = s;
   }
 
   public void addPatience() {
@@ -141,7 +150,7 @@ public class Party extends Clickable {
   public void setState(String s) {
     state = s;
     if (s.equals("waiting") || s.equals("waitingForFood") || s.equals("done")) {
-      timeSpent = speed; //so that their patience won't decrease
+      timeSpent = (int)speed; //so that their patience won't decrease
       ready = true; //so that they can be clicked on
     } else {
       timeSpent = 0; ///reset the time spent doing something
@@ -160,14 +169,15 @@ public class Party extends Clickable {
     }
   }
 
+
   public void setLocation(Table t) {
     super.setLocation(t.getX(), t.getY());
     table = t;
     for (int i = 0; i < size; i++) {
       if (i < t.getMaxSeats()/2) {
-        customers.get(i).setLocation(t.getX()-table.getW()/4, getY()+50*(i%(t.getMaxSeats()/2)));
+        customers.get(i).setLocation(t.getX()-table.getW()/5, getY()+25*(i%(t.getMaxSeats()/2)));
       } else if (i < t.getMaxSeats()) {
-        customers.get(i).setLocation(t.getX()+table.getW()/4, getY()+50*(i%(t.getMaxSeats()/2)));
+        customers.get(i).setLocation(t.getX()+table.getW()/5, getY()+25*(i%(t.getMaxSeats()/2)));
       }
     }
     thoughtBubble.setLocation(t.getX(), t.getY()-45);

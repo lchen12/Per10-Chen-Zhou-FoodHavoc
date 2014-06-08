@@ -7,7 +7,7 @@ public class CoffeeMachine extends Furniture {
   public CoffeeMachine() {
     super(20, "coffeeMachine.gif", 36, 50);
     timeSpent = 0;
-    speed = 3;
+    speed = 5;
     ready = false;
     thoughtBubble = new ThoughtBubble(getX()+getW()/2, getY()-10);
   }
@@ -23,6 +23,7 @@ public class CoffeeMachine extends Furniture {
   public void display(){
     super.display();
     if (ready){
+      thoughtBubble.setLocation(getX()+getW()/2, getY()-10);
       thoughtBubble.display();
     }
   }      
