@@ -10,7 +10,7 @@ public class Party extends Clickable {
   private boolean ready;
   private ThoughtBubble thoughtBubble;
 
-  public Party(Random rand, int max, int x, int y, String type, Player p) {
+  public Party(Random rand, int max, int x, int y, String type,Player p) {
     super(x, y);
     size = rand.nextInt(max)+1;
     customers = new ArrayList<Customer>();
@@ -47,7 +47,6 @@ public class Party extends Clickable {
     }
     this.type = type;
     maxPatience = (int)(customers.get(0).getPatience()*p.getPatienceFactor());
-    patience = maxPatience;
     speed = customers.get(0).getSpeed()*p.getCustomerSlowFactor();
     state = "waiting";
     table = null;
@@ -117,11 +116,12 @@ public class Party extends Clickable {
   public int getMaxPatience() {
     return maxPatience;
   }
-
-  public void setMaxPatience(int p) {
+  
+    public void setMaxPatience(int p) {
     maxPatience = p;
   }
-  
+ 
+
   public void setPatience(int p) {
     if (p <= maxPatience) {
       patience = p;
@@ -129,11 +129,11 @@ public class Party extends Clickable {
       patience = maxPatience;
     }
   }
-  
-  public void setSpeed(double s){
-    speed = s;
-  }
 
+public void setSpeed(double s){
+    speed = s;
+   }
+ 
   public void addPatience() {
     patience = getPatience() + maxPatience/5;
     if (patience > maxPatience) {
@@ -147,14 +147,14 @@ public class Party extends Clickable {
 
   public void decrease() {
     if (timeSpent>=speed && !state.equals("done")) {  ///if customer is ready and waiting, i.e. isn't ordering or eating or finished eating, then decrease patience.
-      patience-=2;
+      patience-=0.5;
     }
   }
 
   public void setState(String s) {
     state = s;
     if (s.equals("waiting") || s.equals("waitingForFood") || s.equals("done")) {
-      timeSpent = (int)speed; //so that their patience won't decrease
+      timeSpent =(int)speed; //so that their patience won't decrease
       ready = true; //so that they can be clicked on
     } else {
       timeSpent = 0; ///reset the time spent doing something
@@ -173,15 +173,14 @@ public class Party extends Clickable {
     }
   }
 
-
   public void setLocation(Table t) {
     super.setLocation(t.getX(), t.getY());
     table = t;
     for (int i = 0; i < size; i++) {
       if (i < t.getMaxSeats()/2) {
-        customers.get(i).setLocation(t.getX()-table.getW()/5, getY()+25*(i%(t.getMaxSeats()/2)));
+        customers.get(i).setLocation(t.getX()-table.getW()/4, getY()+50*(i%(t.getMaxSeats()/2)));
       } else if (i < t.getMaxSeats()) {
-        customers.get(i).setLocation(t.getX()+table.getW()/5, getY()+25*(i%(t.getMaxSeats()/2)));
+        customers.get(i).setLocation(t.getX()+table.getW()/4, getY()+50*(i%(t.getMaxSeats()/2)));
       }
     }
     thoughtBubble.setLocation(t.getX(), t.getY()-45);

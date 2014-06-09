@@ -1,3 +1,5 @@
+////////////REMEMBER TO ADD COFFEE FEATURE
+///////////////ALSO ADD CHAIN FEATURE
 public class Player {
   private int level, money, goal, profit, x, y, w, h, hold, streakNum, updateTime, updateTimeMax; //hold = # of items player is holding; can't be more than 2
   private String gender, streakType, updateProfit;
@@ -6,8 +8,8 @@ public class Player {
   private ArrayList<Plate> plates;
   private ArrayList<Coffee> coffee;
   private boolean hasCoffee;
-  private double speed, chefTimeCook, patienceFactor, customerSlowFactor;
-
+ private double speed, chefTimeCook, patienceFactor, customerSlowFactor;
+  
   private PImage person;
 
   ///DEFAULT CONSTRUCTOR
@@ -29,8 +31,8 @@ public class Player {
     y = displayHeight/6;
     speed = 3.0;
     chefTimeCook = 700;
-    patienceFactor = 1.0;
-    customerSlowFactor = 1.0;
+   patienceFactor = 1.0;
+   customerSlowFactor = 1.0;
     domes = new ArrayList<ServingDome>();
     menus = new ArrayList<Menu>();
     plates = new ArrayList<Plate>();
@@ -63,8 +65,8 @@ public class Player {
     y = displayHeight/6;
     speed = s;
     chefTimeCook = ct;
-    patienceFactor = pf;
-    customerSlowFactor = cs;
+   patienceFactor = pf;
+     customerSlowFactor = cs;
     domes = new ArrayList<ServingDome>();
     menus = new ArrayList<Menu>();
     plates = new ArrayList<Plate>();
@@ -120,7 +122,7 @@ public class Player {
       }
       coffee.get(i).display();
     }
-    if (updateTime<updateTimeMax) {
+    if (updateTime<updateTimeMax){
       text(updateProfit, x, y+h+20);
     }
   }
@@ -165,6 +167,7 @@ public class Player {
     }
     return false;
   }
+  
 
   public void removeOrderNumber(int o) { ///when a customer runs out of patience and leaves, remove all menus/domes with order number
     removeDome(o);
@@ -195,21 +198,21 @@ public class Player {
     }
     return null;
   }
-
+  
   public Coffee removeCoffee() {
     for (int i = 0; i < coffee.size (); i++) {
       Coffee c = coffee.get(i);
       coffee.remove(i);
       hold--;
-      if (coffee.size()==0) {
+      if (coffee.size()==0){
         hasCoffee = false;
       }
       return c;
     }
     return null;
   }
-
-  public boolean hasCoffee() {
+  
+  public boolean hasCoffee(){
     return hasCoffee;
   }
 
@@ -258,14 +261,22 @@ public class Player {
   public int getLevel() {
     return level;
   }  
+  public int factorial(int n) {
+     if (n == 1) {
+       return n;
+     } else {
+       return n * factorial(n-1);
+    }
+  }
   public int getMoney() {
     return money;
   }  
-  public int getGoal() {
-    return goal;
-  }
+ 
   public void setGoal(int g) {
     goal = g;
+  }
+   public int getGoal() {
+    return goal;
   }
   public int getProfit() {
     return profit;
@@ -280,40 +291,36 @@ public class Player {
     x = a;
     y = b;
   }
+
   public double getSpeed() {
     return speed;
   }
   public void increaseSpeed() {
     speed+=speed/5;
+   }
+   public double getPatienceFactor() {
+     return patienceFactor;
+   }
+   public void increasePatienceFactor() {
+     patienceFactor+=patienceFactor/10;
+   }
+   public double getCustomerSlowFactor() {
+     return customerSlowFactor;
+   }
+   public void decreaseCustomerSlowFactor() {
+     customerSlowFactor-=customerSlowFactor/10;
   }
-  public double getPatienceFactor() {
-    return patienceFactor;
-  }
-  public void increasePatienceFactor() {
-    patienceFactor+=patienceFactor/10;
-  }
-  public double getCustomerSlowFactor() {
-    return customerSlowFactor;
-  }
-  public void decreaseCustomerSlowFactor() {
-    customerSlowFactor-=customerSlowFactor/10;
-  }
-  public double getChefTimeCook(){
+   public double getChefTimeCook(){
     return chefTimeCook;
   }
-  public void decreaseChefTimeCook(){
+   public void decreaseChefTimeCook(){
     chefTimeCook-=chefTimeCook/5;
-  }
+   }
   public void level() {
     level++;
-    goal = 500+factorial(level)*100;
-  }
-  public int factorial(int n) {
-    if (n == 1) {
-      return n;
-    } else {
-      return n * factorial(n-1);
-    }
+    goal+=level*100;
+    profit = 0;
+  
   }
   public boolean addMoney(int m) {
     println(m);
@@ -323,7 +330,7 @@ public class Player {
     money+=m;
     return true;
   }
-  public void resetProfit() {
+  public void resetProfit(){
     profit = 0;
   }
   public void addProfit(int p) {    
@@ -356,7 +363,7 @@ public class Player {
       streakNum=1;
     }
   }
-
+  
   public void updateProfit(int p) {
     updateTime = 0;
     updateProfit = "Profit: "+p+"x"+streakNum;
@@ -364,11 +371,12 @@ public class Player {
   public void updateTips(int t) {
     updateProfit+= "\nTips: $"+t;
   }
-
+  
   public void updateTime() {
     if (updateTime < updateTimeMax) {
       updateTime++;
     }
   }
+  
 }
 
