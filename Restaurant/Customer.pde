@@ -1,9 +1,9 @@
 public class Customer extends Clickable {
   
-  private int patience, speed;
-  private boolean isTable;
+  private int patience;
+  private double speed;
   
-  public Customer(String gif, int w, int h, int p, int s) {
+  public Customer(String gif, int w, int h, int p, double s) {
     super(gif, w, h);
     patience = p;
     speed = 10;
@@ -25,11 +25,11 @@ public class Customer extends Clickable {
     patience=patience-10;
   }
 
-  public void setSpeed(int s) {
+  public void setSpeed(double s) {
     speed=s;
   }
 
-  public int getSpeed() {
+  public double getSpeed() {
     return speed;
   }
   
