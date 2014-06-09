@@ -1,6 +1,8 @@
-table,810,500,4,2
-trashBin,1440,300
-orderHolder,1536,500
-table,678,310,4,2
-table,1005,311,4,2
-coffeeMachine,1522,192
+table,960,500,4,3
+orderHolder,1536,150
+table,1146,316,4,3
+table,1284,568,4,3
+table,913,242,12,8
+coffeeMachine,1554,253
+trashBin,1371,182
+table,1333,389,4,3

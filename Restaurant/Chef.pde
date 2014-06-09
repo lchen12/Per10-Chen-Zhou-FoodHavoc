@@ -1,10 +1,11 @@
 public class Chef extends Furniture {
   
-  private int timeCook, orderNumber;
+  private int orderNumber;
+  private double timeCook;
   
-  public Chef(int x, int y, int o) {
+  public Chef(int x, int y, int o, double t) {
     super(0, "chef.gif", 80, 130, x, y);
-    timeCook = 2; //takes (timeCook* timeInterval from main) seconds for chef to make food
+    timeCook = t; //takes (timeCook* timeInterval from main) seconds for chef to make food
     orderNumber = o;
   }
   
@@ -20,7 +21,7 @@ public class Chef extends Furniture {
     timeCook--;
   }
   
-  public int getTime(){
+  public double getTime(){
     return timeCook;
   }
   
