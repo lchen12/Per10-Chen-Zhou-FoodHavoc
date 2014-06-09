@@ -1,8 +1,15 @@
 //////////OPTIONAL: ADD A PODIUM TO MAKE CUSTOMERS WAITING IN LINE HAPPIER
+////////////really laggy when lots of stuff...
+
+////////////Sound
+import ddf.minim.*;
 import java.util.*;
 import java.io.*;
 import java.math.*;
 
+//////sound variables
+Minim minim;
+AudioPlayer song;
 //////////somehow use stacks?
 Hashtable<String, String> users;
 ArrayList<Furniture> items; ///furniture that the player has already bought
@@ -19,6 +26,7 @@ Clickable current; //item that player just clicked on
 int id, maxPartySize, customersToServe, customersWaiting, customersWaitingForFood, lastTimeCheck, timeInterval, lastTimeCustomer, timeAddCustomer;
 //lastTimeCustomer, timeAddCustomer keeps track of how long after the last customers appeared
 PImage image /*, play, buy*/;
+Close close;
 Random rand;
 
 void setup() {
@@ -35,7 +43,7 @@ void setup() {
   mainScreen = new TextBox("Main Screen", 0, 255, 0, displayWidth-200, 50, 200, 50);
   yes = new TextBox("YES", 255, 0, 0, displayWidth/2, 50, 100, 50);
   no = new TextBox("NO", 0, 0, 255, displayWidth/2+100, 50, 100, 50);
-  stats = new TextBox("", 255, 255, 255, 0, displayHeight-200, displayWidth, 50);
+  stats = new TextBox("", 255, 255, 255, 0, displayHeight-100, displayWidth, 100);
   cancel = new TextBox("Cancel", 255, 0, 0, displayWidth-350, 50, 150, 50);
   continu = new TextBox("Continue", 255, 255, 0, displayWidth-350, 50, 150, 50);
   play = new TextBox("PLAY", 0, 255, 0, displayWidth/5, displayHeight/4, 150, 50);
@@ -52,7 +60,7 @@ void setup() {
   users = new Hashtable<String, String>();
   entered = false;
   readUsersFile();
-  image = loadImage("diner1.png");
+  image = loadImage("diner.png");
   image.resize(displayWidth, displayHeight);
   current = null;
   options = new ArrayList<String>();
@@ -65,7 +73,10 @@ void setup() {
   timeInterval = 2000; //2000
   lastTimeCustomer = millis();
   timeAddCustomer = 9000; //9000
-  maxPartySize = 2;
+  close = new Close(displayWidth/4, displayHeight/4);
+  maxPartySize = 2;  minim=new Minim(this);
+  song= minim.loadFile("music.mp3");
+  song.loop();
 }
 
 void draw() {
@@ -132,7 +143,7 @@ void draw() {
   } else if (state.equals("seatCustomers")) {
     seatCustomers();
   } else if (state.equals("endLevel")) {
-    endLevel();
+    close();
   } else if (state.equals("shop")) {
     shop();
   } else if (state.equals("moveMerchandise")) {
@@ -154,6 +165,12 @@ void draw() {
   } else if (state.equals("confirmMainScreen")) {
     confirmMainScreen();
   }
+}
+
+void stop(){
+  song.close();
+  minim.stop();
+  super.stop();
 }
 
 void readUsersFile() { ////THIS TAKES USERNAMES+PASSWORDS FROM USERS.CSV AND PUTS THEM INTO HASHTABLE
@@ -383,8 +400,8 @@ void savePlayer() {
 void startFurniture() {
   PrintWriter output = createWriter("users/"+username+".csv");
   output.println("table,"+displayWidth/2+",500,4,2");
-  output.println("trashBin,"+(displayWidth-displayWidth/3)+","+(displayHeight/5));
-  output.println("orderHolder,"+(displayWidth-displayWidth/5)+",150");
+  output.println("trashBin,"+(int)(displayWidth-displayWidth/2.5)+","+(displayHeight/5));
+  output.println("orderHolder,"+(int)(displayWidth-displayWidth/3.5)+",150");
   output.flush();
   output.close();
 }
@@ -886,11 +903,11 @@ void play() {
           if (m!=null) {
             f.remove(m);
             print(m.getOrderNumber());
-            f.add(new Chef(displayWidth*5/6+m.getOrderNumber()*50, displayHeight/7+100*m.getOrderNumber(), m.getOrderNumber(), p.getChefTimeCook())); //creates a chef near the dome
+            f.add(new Chef(displayWidth*3/4+m.getOrderNumber()*25, displayHeight/7+100*m.getOrderNumber(), m.getOrderNumber(), p.getChefTimeCook())); //creates a chef near the dome
             m = p.removeMenu();
             if (m!=null) {
               f.remove(m);
-              f.add(new Chef(displayWidth*5/6+m.getOrderNumber()*50, displayHeight/7+100*m.getOrderNumber(), m.getOrderNumber(), p.getChefTimeCook())); //creates a chef near the dome
+              f.add(new Chef(displayWidth*3/4+m.getOrderNumber()*25, displayHeight/7+100*m.getOrderNumber(), m.getOrderNumber(), p.getChefTimeCook())); //creates a chef near the dome
             }
           }
         } else if (c.toString().equals("trashBin")) {
@@ -959,6 +976,11 @@ void seatCustomers() {
     }
     mouseClicked = false;
   }
+}
+
+void close() {
+  close.display();
+  endLevel();
 }
 
 void endLevel() {

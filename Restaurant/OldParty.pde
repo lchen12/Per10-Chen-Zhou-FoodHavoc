@@ -25,7 +25,7 @@ public class OldParty extends Party {
       size(2*getW(), getH());
     }
     setCustomers(c);
-    setMaxPatience((int)(customers.get(0).getPatience()*p.getPatienceFactor()));
+    setMaxPatience((int)(getCustomers().get(0).getPatience()*p.getPatienceFactor()));
     setPatience(getMaxPatience());
     //setSpeed(customers.get(0).getSpeed()*p.getCustomerSpeedFactor());
   }

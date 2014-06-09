@@ -88,6 +88,10 @@ public class Party extends Clickable {
       text("Patience: "+patience, getX(), getY()-10);
     }
   }
+  
+  public ArrayList<Customer> getCustomers(){
+    return customers;
+  }
 
   ///this function is for the party with old people
   public void setCustomers(ArrayList<Customer> c) {
