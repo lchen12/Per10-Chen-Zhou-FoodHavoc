@@ -48,7 +48,7 @@ void setup() {
   users = new Hashtable<String, String>();
   entered = false;
   readUsersFile();
-  image = loadImage("diner.png");
+  image = loadImage("diner1.png");
   image.resize(displayWidth, displayHeight);
   current = null;
   options = new ArrayList<String>();
